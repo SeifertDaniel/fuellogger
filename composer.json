@@ -1,0 +1,25 @@
+{
+    "name": "daniels/fuellogger",
+    "type": "library",
+    "require": {
+        "doctrine/dbal": "^3",
+        "lxlang/tankerkoenig-php-client": "^0.0.1",
+        "ramsey/uuid": "4.x-dev",
+        "ramsey/uuid-doctrine": "dev-main",
+        "guzzlehttp/guzzle": "7.4.x-dev",
+        "vlucas/phpdotenv": "5.4.x-dev",
+        "monolog/monolog": "2.x-dev"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Daniels\\FuelLogger\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Daniel Seifert",
+            "email": "git@daniel-seifert.com"
+        }
+    ]
+}
