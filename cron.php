@@ -5,6 +5,7 @@ namespace Daniels\Benzinlogger;
 use Daniels\Benzinlogger\Application\Model\BestPriceNotifier;
 use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Application\Model\Station;
+use Daniels\Benzinlogger\Core\Registry;
 use Dotenv\Dotenv;
 use Lang\Tankerking\ApiClient;
 
@@ -26,6 +27,8 @@ class cron
     public function addCurrent()
     {
         $updatePrices = [];
+
+        Registry::getLogger()->debug('cron started');
 
         foreach ($this->getStations() as $stationTkId => $stationData) {
             $station = new Station();
@@ -61,6 +64,8 @@ class cron
         }
 
         new BestPriceNotifier($updatePrices);
+
+        Registry::getLogger()->debug('cron finished');
     }
 
     public function getStations()

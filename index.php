@@ -4,6 +4,7 @@ namespace Daniels\Benzinlogger;
 
 use Daniels\Benzinlogger\Application\Controller\controllerInterface;
 use Daniels\Benzinlogger\Application\Model\ControllerMapper;
+use Daniels\Benzinlogger\Core\Registry;
 use Dotenv\Dotenv;
 
 require_once '../vendor/autoload.php';
@@ -16,7 +17,7 @@ class index
         $dotenv->load();
         $dotenv->required(['DBHOST', 'DBNAME', 'DBUSER', 'DBPASS', 'DBDRIVER'])->notEmpty();
 
-        $cl = $_GET['cl'] ?: 'bestPriceList';
+        $cl = Registry::getRequest()->getRequestEscapedParameter('cl') ?: 'bestPriceList';
 
         $mapper = new ControllerMapper();
         $fqns = $mapper->getFQNS($cl);
