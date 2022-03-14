@@ -4,13 +4,34 @@ namespace Daniels\Benzinlogger\Application\Controller;
 
 use Daniels\Benzinlogger\Application\Model\DBConnection;
 use Daniels\Benzinlogger\Application\Model\Price;
+use Daniels\Benzinlogger\Application\Model\PriceStatistics;
 use Daniels\Benzinlogger\Application\Model\Station;
+use Daniels\Benzinlogger\Core\Registry;
 
 class stationPriceList implements controllerInterface
 {
     public function render()
     {
-        $stationId = $_GET['stationId'];
+        $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
+
+        $pricestat = new PriceStatistics();
+        $qb = $pricestat->getLowPriceStatsByStation($stationId);
+
+        echo "<table style='border: 1px solid silver'>";
+        echo "<tr>";
+        echo "<th>Datum</th>";
+        echo "<th>durchschn. Erh&ouml;hung</th>";
+        echo "<th>durchschn. Haltezeit Tiefpreis</th>";
+        echo "</tr>";
+
+        foreach ($qb->fetchAllAssociative() as $statItem) {
+            echo "<tr>";
+            echo "<td>".$statItem['date']."</td>";
+            echo "<td>".$statItem['pricediff']."</td>";
+            echo "<td>".$statItem['timediff']." Min.</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
 
         $conn = DBConnection::getConnection();
         $qb = $conn->createQueryBuilder();
