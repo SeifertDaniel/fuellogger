@@ -4,11 +4,11 @@
     "require": {
         "doctrine/dbal": "^3",
         "lxlang/tankerkoenig-php-client": "^0.0.1",
-        "ramsey/uuid": "4.x-dev",
-        "ramsey/uuid-doctrine": "dev-main",
-        "guzzlehttp/guzzle": "7.4.x-dev",
-        "vlucas/phpdotenv": "5.4.x-dev",
-        "monolog/monolog": "2.x-dev",
+        "ramsey/uuid": "^4.2",
+        "ramsey/uuid-doctrine": "^1.8",
+        "guzzlehttp/guzzle": "^7.4",
+        "vlucas/phpdotenv": "^5.4",
+        "monolog/monolog": "^2.3",
         "doctrine/migrations": "^3.4"
     },
     "license": "MIT",
