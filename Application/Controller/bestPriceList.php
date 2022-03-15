@@ -6,6 +6,11 @@ use Daniels\Benzinlogger\Application\Model\BestPrice;
 
 class bestPriceList implements controllerInterface
 {
+    public function init()
+    {
+
+    }
+
     public function render()
     {
         $qb = (new BestPrice())->getQueryBuilder();

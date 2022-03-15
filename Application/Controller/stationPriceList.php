@@ -7,11 +7,22 @@ use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Application\Model\PriceStatistics;
 use Daniels\Benzinlogger\Application\Model\Station;
 use Daniels\Benzinlogger\Core\Registry;
+use ezcGraphArrayDataSet;
+use ezcGraphDataSetColorProperty;
+use ezcGraphLineChart;
+use ezcGraphRenderer3d;
 
 class stationPriceList implements controllerInterface
 {
+    public function init()
+    {
+
+    }
+
     public function render()
     {
+        echo '<img src="'.Registry::getRequest()->getRequestUrl().'&amp;fnc=getGraph'.'">';
+
         $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
 
         $pricestat = new PriceStatistics();
@@ -49,7 +60,8 @@ class stationPriceList implements controllerInterface
                     "pr.stationid",
                     $qb->createNamedParameter($stationId)
                 )
-            )->orderBy("pr.datetime", 'ASC');
+            )->orderBy("pr.datetime", 'DESC')
+            ->setMaxResults(20);
 
         echo "<table style='border: 1px solid silver'>";
         echo "<tr>";
@@ -68,5 +80,75 @@ class stationPriceList implements controllerInterface
             echo "</tr>";
         }
         echo "</table>";
+    }
+
+    public function getGraph()
+    {
+        $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
+        $conn = DBConnection::getConnection();
+
+        $station = new Station();
+        $stationTable = $station->getCoreTableName();
+        $prices = new Price();
+        $priceTable = $prices->getCoreTableName();
+
+        $qb = $conn->createQueryBuilder();
+        $qb->select('name')
+            ->from($stationTable)
+            ->where($qb->expr()->eq(
+                'id',
+                $qb->createNamedParameter($stationId)
+            ));
+        $stationName = $qb->fetchOne();
+
+        $graph = new ezcGraphLineChart(['stackBars' => false]);
+        $graph->title = $stationName;
+
+        $qb = $conn->createQueryBuilder();
+        $qb->select('st.name', 'st.place', "pr.price", 'pr.datetime')
+           ->from($stationTable, 'st')
+           ->leftJoin('st', $priceTable, 'pr', 'st.id = pr.stationid')
+           ->where(
+               $qb->expr()->eq(
+                   "pr.stationid",
+                   $qb->createNamedParameter($stationId)
+               )
+           )->orderBy("pr.datetime", 'ASC');
+
+        $fetched = $qb->fetchAllAssociative();
+
+        $firstDate = current($fetched)['datetime'];
+
+        $rawValues = [];
+        foreach ($qb->fetchAllAssociative() as $priceItem) {
+            $dt = new \DateTime($priceItem['datetime']);
+            $formatted = $dt->format('d.m. H:i');
+            $rawValues[$formatted] = $priceItem['price'];
+        }
+
+        $currentPrice = 200;
+        $dValues = [];
+        $period = new \DatePeriod(new \DateTime($firstDate), new \DateInterval('PT1M'), new \DateTime());
+        foreach($period as $date) {
+            if (isset($rawValues[$date->format("d.m. H:i")])) {
+                $currentPrice = $rawValues[$date->format("d.m. H:i")]*100;
+            }
+            $dValues[$date->format("d.m. H:i")] = $currentPrice;
+        }
+
+        $source = [
+            'E10'   => $dValues
+        ];
+
+        // Add data
+        foreach ( $source as $fuelType => $data )
+        {
+            $data = new ezcGraphArrayDataSet( $data );
+            $graph->data[$fuelType] = $data;
+        }
+
+        $graph->renderToOutput( 700, 300 );
+
+        die();
     }
 }
