@@ -8,9 +8,7 @@ use Daniels\Benzinlogger\Application\Model\PriceStatistics;
 use Daniels\Benzinlogger\Application\Model\Station;
 use Daniels\Benzinlogger\Core\Registry;
 use ezcGraphArrayDataSet;
-use ezcGraphDataSetColorProperty;
 use ezcGraphLineChart;
-use ezcGraphRenderer3d;
 
 class stationPriceList implements controllerInterface
 {
@@ -47,36 +45,39 @@ class stationPriceList implements controllerInterface
         $conn = DBConnection::getConnection();
         $qb = $conn->createQueryBuilder();
 
-        $station = new Station();
-        $stationTable = $station->getCoreTableName();
         $prices = new Price();
         $priceTable = $prices->getCoreTableName();
 
-        $qb->select('st.name', 'st.place', "pr.price", 'pr.datetime')
-            ->from($stationTable, 'st')
-            ->leftJoin('st', $priceTable, 'pr', 'st.id = pr.stationid')
+        $qb->select("DATE_FORMAT(t1.datetime, '%d.%m. %H:%i') ts1", "DATE_FORMAT(IF(min(t2.datetime) IS NULL, NOW(), min(t2.datetime)), '%d.%m %H:%i') ts2", "t1.price")
+            ->from($priceTable, 't1')
+            ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime')
             ->where(
-                $qb->expr()->eq(
-                    "pr.stationid",
-                    $qb->createNamedParameter($stationId)
+                $qb->expr()->and(
+                    $qb->expr()->eq(
+                        't1.stationid',
+                        $qb->createNamedParameter($stationId)
+                    ),
+                    $qb->expr()->gt(
+                        't1.datetime',
+                        'date_sub(NOW(), interval 1 day)'
+                    )
                 )
-            )->orderBy("pr.datetime", 'DESC')
-            ->setMaxResults(20);
+            )
+            ->groupBy('t1.stationid', 't1.datetime')
+            ->orderBy('ts1', 'DESC');
 
         echo "<table style='border: 1px solid silver'>";
         echo "<tr>";
-        echo "<th>Tankstelle</th>";
-        echo "<th>Ort</th>";
-        echo "<th>aktueller Preis</th>";
-        echo "<th>&Auml;nderung vor (Std:Min)</th>";
+        echo "<th>von</th>";
+        echo "<th>bis</th>";
+        echo "<th>Preis</th>";
         echo "</tr>";
 
         foreach ($qb->fetchAllAssociative() as $priceItem) {
             echo "<tr>";
-            echo "<td>".$priceItem['name']."</td>";
-            echo "<td>".$priceItem['place']."</td>";
+            echo "<td>".$priceItem['ts1']."</td>";
+            echo "<td>".$priceItem['ts2']."</td>";
             echo "<td>".$priceItem['price']."</td>";
-            echo "<td>".$priceItem['datetime']."</td>";
             echo "</tr>";
         }
         echo "</table>";
@@ -92,52 +93,42 @@ class stationPriceList implements controllerInterface
         $prices = new Price();
         $priceTable = $prices->getCoreTableName();
 
-        $qb = $conn->createQueryBuilder();
-        $qb->select('name')
+        $qbs = $conn->createQueryBuilder();
+        $qbs->select('CONCAT(name, " (", place, ")")')
             ->from($stationTable)
-            ->where($qb->expr()->eq(
+            ->where($qbs->expr()->eq(
                 'id',
-                $qb->createNamedParameter($stationId)
+                $qbs->createNamedParameter($stationId)
             ));
-        $stationName = $qb->fetchOne();
+        $stationName = $qbs->fetchOne();
 
         $graph = new ezcGraphLineChart(['stackBars' => false]);
         $graph->title = $stationName;
 
+        $interval = 5; // minutes
+        $intervalSec = $interval * 60; // secondes
+        $duration = 1; // week
+        $intervalsPerWeek = 60 / $interval * 24 * (7 * $duration);
+
+        $subQb1 = $conn->createQueryBuilder();
+        $subQb1->select('date_sub(DATE_SUB(now(),INTERVAL MOD(unix_timestamp(now()),'.$intervalSec.') SECOND), interval '.$duration.' WEEK) + interval (seq * '.$interval.') Minute as hh')
+            ->from('seq_0_to_'.$intervalsPerWeek);
+
+        $subQb2 = $conn->createQueryBuilder();
+        $subQb2->select('t1.price', 't1.datetime ts1', 'IF(min(t2.datetime) IS NULL, NOW(), min(t2.datetime)) ts2')
+            ->from($priceTable, 't1')
+            ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime')
+            ->where('t1.stationid = '.$conn->quote($stationId))
+            ->groupBy('t1.stationid', 't1.datetime');
+
         $qb = $conn->createQueryBuilder();
-        $qb->select('st.name', 'st.place', "pr.price", 'pr.datetime')
-           ->from($stationTable, 'st')
-           ->leftJoin('st', $priceTable, 'pr', 'st.id = pr.stationid')
-           ->where(
-               $qb->expr()->eq(
-                   "pr.stationid",
-                   $qb->createNamedParameter($stationId)
-               )
-           )->orderBy("pr.datetime", 'ASC');
-
-        $fetched = $qb->fetchAllAssociative();
-
-        $firstDate = current($fetched)['datetime'];
-
-        $rawValues = [];
-        foreach ($qb->fetchAllAssociative() as $priceItem) {
-            $dt = new \DateTime($priceItem['datetime']);
-            $formatted = $dt->format('d.m. H:i');
-            $rawValues[$formatted] = $priceItem['price'];
-        }
-
-        $currentPrice = 200;
-        $dValues = [];
-        $period = new \DatePeriod(new \DateTime($firstDate), new \DateInterval('PT1M'), new \DateTime());
-        foreach($period as $date) {
-            if (isset($rawValues[$date->format("d.m. H:i")])) {
-                $currentPrice = $rawValues[$date->format("d.m. H:i")]*100;
-            }
-            $dValues[$date->format("d.m. H:i")] = $currentPrice;
-        }
+        $qb->select('DATE_FORMAT(sequence.hh, "%d.%m %H:%i") as datetime', 'priceseries.price * 100')
+            ->from('('.$subQb1->getSQL().')', 'sequence')
+            ->join('sequence', '('.$subQb2->getSQL().')', 'priceseries', 'sequence.hh BETWEEN priceseries.ts1 AND priceseries.ts2');
+        $fetched = $qb->fetchAllKeyValue();
 
         $source = [
-            'E10'   => $dValues
+            'E10'   => $fetched
         ];
 
         // Add data
@@ -147,7 +138,7 @@ class stationPriceList implements controllerInterface
             $graph->data[$fuelType] = $data;
         }
 
-        $graph->renderToOutput( 700, 300 );
+        $graph->renderToOutput( 1000, 300 );
 
         die();
     }
