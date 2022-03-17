@@ -5,6 +5,7 @@ namespace Daniels\Benzinlogger\Application\Controller;
 use Daniels\Benzinlogger\Application\Model\DBConnection;
 use Daniels\Benzinlogger\Application\Model\ezcGraph\ezcFlexibleColor2DRenderer;
 use Daniels\Benzinlogger\Application\Model\ezcGraph\ezcGraphArrayDataSetOpneningTimesColors;
+use Daniels\Benzinlogger\Application\Model\openingTimes;
 use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Application\Model\PriceStatistics;
 use Daniels\Benzinlogger\Application\Model\Station;
@@ -125,7 +126,7 @@ class stationPriceList implements controllerInterface
             ->groupBy('t1.stationid', 't1.datetime');
 
         $qb = $conn->createQueryBuilder();
-        $qb->select('DATE_FORMAT(sequence.hh, "%d.%m. %H:%i") as datetime', 'priceseries.price * 100')
+        $qb->select('DATE_FORMAT(sequence.hh, "%d.%m.%Y %H:%i") as datetime', 'priceseries.price * 100')
             ->from('('.$subQb1->getSQL().')', 'sequence')
             ->join('sequence', '('.$subQb2->getSQL().')', 'priceseries', 'sequence.hh BETWEEN priceseries.ts1 AND priceseries.ts2');
         $fetched = $qb->fetchAllKeyValue();
@@ -134,13 +135,15 @@ class stationPriceList implements controllerInterface
             'E10'   => $fetched
         ];
 
+        $openingTimes = new openingTimes($stationId);
+
         // Add data
         foreach ( $source as $fuelType => $data )
         {
             $data = new ezcGraphArrayDataSetOpneningTimesColors( $data );
             $color = new ezcGraphDataSetColorProperty( $data );
             foreach ($data->getKeys() as $key) {
-                if ($this->isClosingHour($key)) {
+                if ($openingTimes->isClosedCached($key, $openingTimes->getWeekdayByDate($key))) {
                     $color->offsetSet( $key, new \ezcGraphColor( [ 'red' => 190, 'blue' => 190, 'green' => 190 ] ) );
                 }
             }
@@ -152,28 +155,5 @@ class stationPriceList implements controllerInterface
         $graph->renderToOutput( 1000, 300 );
 
         die();
-    }
-
-    public function isClosingHour($dateTime)
-    {
-        $time = trim(strstr($dateTime, ' '));
-
-        $currentTime = strtotime($time);
-        $startTime = strtotime('22:00');
-        $endTime = strtotime('7:00');
-
-        return (
-            (
-                $startTime < $endTime &&
-                $currentTime >= $startTime &&
-                $currentTime <= $endTime
-            ) ||
-            (
-                $startTime > $endTime && (
-                    $currentTime >= $startTime ||
-                    $currentTime <= $endTime
-                )
-            )
-        );
     }
 }
