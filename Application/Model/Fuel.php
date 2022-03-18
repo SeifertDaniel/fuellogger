@@ -13,19 +13,22 @@
  * @link          http://www.oxidmodule.com
  */
 
-namespace Daniels\Benzinlogger\Application\Model\ezcGraph;
+namespace Daniels\Benzinlogger\Application\Model;
 
-use ezcGraphArrayDataSet;
+use Lang\Tankerking\ApiClient;
 
-class ezcGraphArrayDataSetOpneningTimesColors extends ezcGraphArrayDataSet
+class Fuel
 {
-    public function setProperty($propertyId, $property)
-    {
-        $this->properties[ $propertyId ] = $property;
-    }
+    const TYPE_E10 = ApiClient::TYPE_E10;
+    const TYPE_E5 = ApiClient::TYPE_E5;
+    const TYPE_DIESEL = ApiClient::TYPE_DIESEL;
 
-    public function getKeys()
+    public static function getTypes()
     {
-        return array_keys( $this->data );
+        return [
+            self::TYPE_E10,
+            self::TYPE_E5,
+            self::TYPE_DIESEL
+        ];
     }
 }

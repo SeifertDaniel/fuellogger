@@ -25,10 +25,13 @@ final class Version20220314093924 extends AbstractMigration
               `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;');
 
-        $this->addSql('ALTER TABLE `prices`
-                ADD PRIMARY KEY (`id`);');
+        $this->addSql('
+            ALTER TABLE `prices`
+                ADD PRIMARY KEY (`id`);
+        ');
 
-        $this->addSql('CREATE TABLE `stations` (
+        $this->addSql('
+            CREATE TABLE `stations` (
               `ID` varchar(36) NOT NULL,
               `TKID` char(36) NOT NULL,
               `NAME` varchar(100) NOT NULL,
@@ -42,11 +45,13 @@ final class Version20220314093924 extends AbstractMigration
               `LON` decimal(8,6) NOT NULL,
               `STATE` varchar(10) DEFAULT NULL,
               `TIMESTAMP` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;');
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ');
 
-        $this->addSql('ALTER TABLE `stations`
+        $this->addSql('
+            ALTER TABLE `stations`
               ADD PRIMARY KEY (`ID`),
               ADD UNIQUE KEY `TKID` (`TKID`);
-            }');
+        ');
     }
 }

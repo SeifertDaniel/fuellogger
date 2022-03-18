@@ -3,6 +3,7 @@
 namespace Daniels\Benzinlogger\Application\Model\Notifier;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class WebHook extends AbstractNotifier implements NotifierInterface
 {
@@ -13,6 +14,14 @@ class WebHook extends AbstractNotifier implements NotifierInterface
         $this->url = $url;
     }
 
+    /**
+     * @param $message
+     * @param $price
+     * @param $stations
+     *
+     * @return bool
+     * @throws GuzzleException
+     */
     public function notify($message, $price, $stations)
     {
         if (false === $this->getTimeControl()->availableAtTheMoment()) {
@@ -23,11 +32,13 @@ class WebHook extends AbstractNotifier implements NotifierInterface
         $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
 
         $client = new Client();
-        $client->request(
+        $response = $client->request(
             'POST',
             $this->url,
             $this->getSubmittedOptions($message)
         );
+
+        return $response->getStatusCode() === 200;
     }
 
     public function getSubmittedOptions($message): array

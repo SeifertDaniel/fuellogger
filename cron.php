@@ -3,6 +3,7 @@
 namespace Daniels\Benzinlogger;
 
 use Daniels\Benzinlogger\Application\Model\BestPriceNotifier;
+use Daniels\Benzinlogger\Application\Model\Fuel;
 use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Application\Model\Station;
 use Daniels\Benzinlogger\Core\Registry;
@@ -28,8 +29,6 @@ class cron
     {
         $updatePrices = [];
 
-        Registry::getLogger()->debug('cron started');
-
         foreach ($this->getStations() as $stationTkId => $stationData) {
             $station = new Station();
             $stationId = $station->getIdByTkId($stationTkId);
@@ -53,19 +52,21 @@ class cron
 
             $price = new Price();
 
-            if ($price->getLastPrice($stationId, ApiClient::TYPE_E10) != $stationData['price']) {
-                $price->insert(
-                    $stationId,
-                    ApiClient::TYPE_E10,
-                    $stationData['price']
-                );
-                $updatePrices[] = $stationData['price'];
+            foreach (Fuel::getTypes() as $type) {
+                if ($price->getLastPrice($stationId, $type) != $stationData[$type]) {
+                    $price->insert(
+                        $stationId,
+                        $type,
+                        $stationData[$type]
+                    );
+                    $updatePrices[$type][] = $stationData[$type];
+                }
             }
         }
 
-        new BestPriceNotifier($updatePrices);
+        Registry::getLogger()->debug(serialize($updatePrices));
 
-        Registry::getLogger()->debug('cron finished');
+        new BestPriceNotifier($updatePrices);
     }
 
     public function getStations()
@@ -73,7 +74,7 @@ class cron
         return $this->api->search(
             $_ENV['LOCATIONLAT'],
             $_ENV['LOCATIONLNG'],
-            ApiClient::TYPE_E10,
+            ApiClient::TYPE_ALL,
             4,
             ApiClient::SORT_DIST
         );

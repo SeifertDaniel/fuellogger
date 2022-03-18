@@ -4,7 +4,7 @@ namespace Daniels\Benzinlogger\Application\Model;
 
 class BestPrice
 {
-    public function getQueryBuilder()
+    public function getQueryBuilder($type = Fuel::TYPE_E10)
     {
         $stationTable = (new Station())->getCoreTableName();
         $priceTable = (new Price())->getCoreTableName();
@@ -15,9 +15,15 @@ class BestPrice
         $subQb->select('MAX(p2.datetime)')
             ->from($priceTable, 'p2')
             ->where(
-                $subQb->expr()->eq(
-                    'p2.stationid',
-                    'pr.stationid'
+                $subQb->expr()->and(
+                    $subQb->expr()->eq(
+                        'p2.stationid',
+                        'pr.stationid'
+                    ),
+                    $subQb->expr()->eq(
+                        'p2.type',
+                        'pr.type'
+                    )
                 )
             );
 
@@ -30,6 +36,10 @@ class BestPrice
                     $qb->expr()->eq(
                         'pr.datetime',
                         '('.$subQb->getSQL().')'
+                    ),
+                    $qb->expr()->eq(
+                        'pr.type',
+                        $conn->quote($type)
                     ),
                     $qb->expr()->lt(
                         'TIME_FORMAT(TIMEDIFF(NOW(), pr.datetime), \'%H\')',

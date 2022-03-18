@@ -26,17 +26,19 @@ class Logger
     public function getLogger()
     {
         $logger = new MonologLogger( 'fuelLogger');
-        $this->pushHandler($logger);
-
-        return $logger;
+        return $this->pushHandler($logger);
     }
 
     /**
      * @param MonologLogger $logger
+     *
+     * @return MonologLogger
      */
-    public function pushHandler(&$logger)
+    public function pushHandler(MonologLogger $logger): MonologLogger
     {
         $logger->pushHandler(new StreamHandler('log/error.log', MonologLogger::ERROR));
         $logger->pushHandler(new StreamHandler('log/debug.log', MonologLogger::DEBUG));
+
+        return $logger;
     }
 }

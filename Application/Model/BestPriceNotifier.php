@@ -4,6 +4,7 @@ namespace Daniels\Benzinlogger\Application\Model;
 
 use Daniels\Benzinlogger\Application\Model\Notifier\NotifierInterface;
 use Daniels\Benzinlogger\Application\Model\Notifier\NotifierList;
+use Daniels\Benzinlogger\Core\Registry;
 
 class BestPriceNotifier
 {
@@ -18,29 +19,41 @@ class BestPriceNotifier
 
     public function shouldNotify()
     {
-        $qb = (new BestPrice())->getQueryBuilder();
-        $qb->select('pr.price')
-            ->andWhere(
-                $qb->expr()->lt(
-                    'pr.datetime',
-                    'NOW() - INTERVAL 1 MINUTE'
-                )
-            )
-            ->setMaxResults(1);
+        foreach (Fuel::getTypes() as $type) {
+            if (false === count($this->updatePrices[$type])) {
+                continue;
+            }
 
-        $lowestUpdatePrice = $this->getLowestUpdatePrice();
+            $qb = (new BestPrice())->getQueryBuilder($type);
+            $qb->select('pr.price')
+               ->andWhere(
+                   $qb->expr()->eq(
+                       'pr.type',
+                       $qb->createNamedParameter($type)
+                   ),
+                   $qb->expr()->lt(
+                       'pr.datetime',
+                       'NOW() - INTERVAL 1 MINUTE'
+                   )
+               )
+               ->setMaxResults(1);
 
-        if (isset($lowestUpdatePrice) && $qb->fetchOne() > $lowestUpdatePrice) {
-            $this->notify($lowestUpdatePrice);
+            $lowestUpdatePrice = $this->getLowestUpdatePrice($type);
+            Registry::getLogger()->debug($type .' => '.$qb->fetchOne().' > '.$lowestUpdatePrice);
+            Registry::getLogger()->debug($qb->getSQL());
+            Registry::getLogger()->debug($qb->getParameters());
+            if (isset($lowestUpdatePrice) && $qb->fetchOne() > $lowestUpdatePrice) {
+                $this->notify($lowestUpdatePrice, $type);
+            }
         }
     }
 
-    protected function getLowestUpdatePrice()
+    protected function getLowestUpdatePrice($type = Fuel::TYPE_E10)
     {
-        return count($this->updatePrices) ?
+        return is_array($this->updatePrices) && count($this->updatePrices) && is_array($this->updatePrices[$type]) && count($this->updatePrices[$type]) ?
             min(
                 array_filter(
-                    $this->updatePrices,
+                    $this->updatePrices[$type],
                     function ($price) {
                         return (float) $price > 0.0;
                     }
@@ -49,23 +62,24 @@ class BestPriceNotifier
             null;
     }
 
-    protected function notify($bestPrice)
+    protected function notify($bestPrice, $type = Fuel::TYPE_E10)
     {
-        $stationList = $this->getCheapestStationList();
+        $stationList = $this->getCheapestStationList($type);
 
         /** @var NotifierInterface $notifier */
-        foreach((new NotifierList())->getList() as $notifier) {
+        foreach((new NotifierList())->getList($type) as $notifier) {
+            Registry::getLogger()->debug(get_class($notifier) .' notified');
             $notifier->notify(
-                'Preisupdate:',
+                'Preis '.ucfirst($type).':',
                 $bestPrice,
                 $stationList
             );
         }
     }
 
-    protected function getCheapestStationList()
+    protected function getCheapestStationList($type = Fuel::TYPE_E10)
     {
-        $subQb = (new BestPrice())->getQueryBuilder();
+        $subQb = (new BestPrice())->getQueryBuilder($type);
 
         $conn = DBConnection::getConnection();
         $qb = $conn->createQueryBuilder();

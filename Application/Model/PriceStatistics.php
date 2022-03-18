@@ -2,11 +2,9 @@
 
 namespace Daniels\Benzinlogger\Application\Model;
 
-use function Doctrine\DBAL\Query\QueryBuilder;
-
 class PriceStatistics
 {
-    public function getLowPriceStatsByStation($stationId)
+    public function getLowPriceStatsByStation($stationId, $type = Fuel::TYPE_E10)
     {
         $connection = DBConnection::getConnection();
 
@@ -24,6 +22,10 @@ class PriceStatistics
                     $subsub1Qb->expr()->eq(
                         'x.stationid',
                         'l.stationid'
+                    ),
+                    $subsub1Qb->expr()->eq(
+                        'x.type',
+                        'l.type'
                     )
                 )
             )
@@ -42,6 +44,10 @@ class PriceStatistics
                     $subsub2Qb->expr()->eq(
                         'x.stationid',
                         'l.stationid'
+                    ),
+                    $subsub2Qb->expr()->eq(
+                        'x.type',
+                        'l.type'
                     )
                 )
             )
@@ -57,9 +63,15 @@ class PriceStatistics
         )
             ->from($priceTable, 'l')
             ->where(
-                $subQb->expr()->eq(
-                    'l.stationid',
-                    $connection->quote($stationId)
+                $subQb->expr()->and(
+                    $subQb->expr()->eq(
+                        'l.stationid',
+                        $connection->quote($stationId)
+                    ),
+                    $subQb->expr()->eq(
+                        'l.type',
+                        $connection->quote($type)
+                    )
                 )
             )
             ->having(
@@ -78,7 +90,7 @@ class PriceStatistics
 
         $qb = DBConnection::getConnection()->createQueryBuilder();
         $qb->select('date', 'AVG(tmp.pricediff) as pricediff', 'ROUND(AVG(tmp.timediff)) as timediff')
-            ->from('('.$subQb->getSql().')', 'tmp')
+            ->from('('.$subQb->getSQL().')', 'tmp')
             ->groupBy('tmp.date');
 
         return $qb;

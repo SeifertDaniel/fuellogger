@@ -16,6 +16,13 @@ class CallMeBot extends AbstractNotifier implements NotifierInterface
         $this->apiKey = $apiKey;
     }
 
+    /**
+     * @param $message
+     * @param $price
+     * @param $stations
+     *
+     * @return bool
+     */
     public function notify($message, $price, $stations)
     {
         if (false === $this->getTimeControl()->availableAtTheMoment()) {
@@ -30,11 +37,10 @@ class CallMeBot extends AbstractNotifier implements NotifierInterface
         {
             curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            $html = curl_exec($ch);
+            curl_exec($ch);
             $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            //echo "Output:".$html;  // you can print the output for troubleshooting
             curl_close($ch);
-            return (int) $status;
+            return (bool) $status;
         } else {
             return false;
         }

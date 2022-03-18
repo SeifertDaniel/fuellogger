@@ -39,8 +39,6 @@ class Registry
         }
 
         self::$instances[$key] = $instance;
-
-        return;
     }
 
     /**
