@@ -8,7 +8,7 @@ use Daniels\Benzinlogger\Core\Registry;
 
 class BestPriceNotifier
 {
-    protected $updatePrices = [];
+    protected array $updatePrices = [];
 
     public function __construct($updatePrices)
     {
@@ -20,7 +20,7 @@ class BestPriceNotifier
     public function shouldNotify()
     {
         foreach (Fuel::getTypes() as $type) {
-            if (false === count($this->updatePrices[$type])) {
+            if (0 === count($this->updatePrices[$type])) {
                 continue;
             }
 
@@ -70,7 +70,7 @@ class BestPriceNotifier
         foreach((new NotifierList())->getList($type) as $notifier) {
             Registry::getLogger()->debug(get_class($notifier) .' notified');
             $notifier->notify(
-                'Preis '.ucfirst($type).':',
+                $type,
                 $bestPrice,
                 $stationList
             );

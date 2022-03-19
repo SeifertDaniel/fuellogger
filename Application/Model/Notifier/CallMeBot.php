@@ -23,13 +23,13 @@ class CallMeBot extends AbstractNotifier implements NotifierInterface
      *
      * @return bool
      */
-    public function notify($message, $price, $stations)
+    public function notify($fuelType, $price, $stations) : bool
     {
-        if (false === $this->getTimeControl()->availableAtTheMoment()) {
+        if (false === $this->canNotify($fuelType, $price)) {
             return false;
         }
 
-        $message .= ' '.$price.' '.$stations;
+        $message = 'Preis '.ucfirst($fuelType).': '.$price.' '.$stations;
 
         $url='https://api.callmebot.com/whatsapp.php?source=php&phone='.$this->phoneNumber.'&text='.urlencode($message).'&apikey='.$this->apiKey;
 

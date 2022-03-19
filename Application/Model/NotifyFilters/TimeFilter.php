@@ -1,16 +1,22 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\TimeController;
+namespace Daniels\Benzinlogger\Application\Model\NotifyFilters;
 
 use DateTime;
 
-abstract class AbstractTimeController implements TimeControllerInterface
+class TimeFilter extends AbstractFilter
 {
     public $from;
-
     public $till;
 
-    public function availableAtTheMoment() {
+    public function __construct($from, $till)
+    {
+        $this->from = $from;
+        $this->till = $till;
+    }
+
+    public function canNotifiy($fuelType, float $price) : bool
+    {
         $f = DateTime::createFromFormat('!H:i:s', $this->from);
         $t = DateTime::createFromFormat('!H:i:s', $this->till);
         $i = (new DateTime())->setDate($f->format('Y'),$f->format('m'), $f->format('d'));

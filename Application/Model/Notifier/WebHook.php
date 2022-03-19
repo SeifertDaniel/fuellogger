@@ -22,13 +22,13 @@ class WebHook extends AbstractNotifier implements NotifierInterface
      * @return bool
      * @throws GuzzleException
      */
-    public function notify($message, $price, $stations)
+    public function notify($fuelType, $price, $stations) : bool
     {
-        if (false === $this->getTimeControl()->availableAtTheMoment()) {
+        if (false === $this->canNotify($fuelType, $price)) {
             return false;
         }
 
-        $message .= ' ' . $price . ' ' . $stations;
+        $message = 'Preis '.ucfirst($fuelType).': ' . $price . ' ' . $stations;
         $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
 
         $client = new Client();
