@@ -3,10 +3,11 @@
 namespace Daniels\Benzinlogger\Application\Model\Notifier;
 
 use Daniels\Benzinlogger\Application\Model\NotifyFilters\AbstractFilter;
+use Daniels\Benzinlogger\Core\Registry;
 
 abstract class AbstractNotifier implements NotifierInterface
 {
-    protected array $filters;
+    protected array $filters = [];
 
     public function setFilter(AbstractFilter $filter): self
     {

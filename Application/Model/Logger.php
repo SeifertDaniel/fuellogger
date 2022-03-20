@@ -15,7 +15,8 @@
 
 namespace Daniels\Benzinlogger\Application\Model;
 
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FilterHandler;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger as MonologLogger;
 
 class Logger
@@ -36,8 +37,15 @@ class Logger
      */
     public function pushHandler(MonologLogger $logger): MonologLogger
     {
-        $logger->pushHandler(new StreamHandler('log/error.log', MonologLogger::ERROR));
-        $logger->pushHandler(new StreamHandler('log/debug.log', MonologLogger::DEBUG));
+        $logger->pushHandler(new RotatingFileHandler('log/debug.log', 5, MonologLogger::DEBUG, false));
+        $logger->pushHandler(new RotatingFileHandler('log/error.log', 10, MonologLogger::ERROR));
+
+        $infoStreamHandler = new RotatingFileHandler('log/info.log', 5, MonologLogger::INFO);
+        $infoFilterHandler = new FilterHandler(
+            $infoStreamHandler,
+            MonologLogger::INFO,
+            MonologLogger::WARNING);
+        $logger->pushHandler($infoFilterHandler);
 
         return $logger;
     }
