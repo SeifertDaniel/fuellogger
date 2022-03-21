@@ -71,6 +71,10 @@ class PriceStatistics
                     $subQb->expr()->eq(
                         'l.type',
                         $connection->quote($type)
+                    ),
+                    $subQb->expr()->gt(
+                        'l.datetime',
+                        'DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 3 DAY), "%Y-%m-%d 00:00:00")'
                     )
                 )
             )

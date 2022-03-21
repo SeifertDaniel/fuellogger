@@ -30,6 +30,7 @@ class stationPriceList implements controllerInterface
         $conn = DBConnection::getConnection();
 
         foreach (Fuel::getTypes() as $type) {
+
             $pricestat = new PriceStatistics();
             $qb = $pricestat->getLowPriceStatsByStation($stationId, $type);
 
@@ -135,12 +136,14 @@ class stationPriceList implements controllerInterface
                    ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime and t1.type = t2.type')
                    ->where('t1.stationid = '.$conn->quote($stationId))
                    ->andWhere('t1.type = '.$conn->quote($type))
+                   ->andWhere('t1.datetime > DATE_SUB(NOW(), INTERVAL 1 WEEK)')
                    ->groupBy('t1.stationid', 't1.datetime');
 
             $qb = $conn->createQueryBuilder();
             $qb->select('DATE_FORMAT(sequence.hh, "%d.%m.%Y %H:%i") as datetime', 'priceseries.price * 100')
                ->from('('.$subQb1->getSQL().')', 'sequence')
                ->join('sequence', '('.$subQb2->getSQL().')', 'priceseries', 'sequence.hh BETWEEN priceseries.ts1 AND priceseries.ts2');
+
             $fetched = $qb->fetchAllKeyValue();
 
             $source[ucfirst($type)]   = $fetched;
