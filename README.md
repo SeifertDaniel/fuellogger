@@ -1,6 +1,6 @@
 ## importieren von Bestandsdaten
 
-Tankerkönig stellt unter https://creativecommons.tankerkoenig.de/history Bestandsdaten zur Verfügung. Diese können importiert werden. Lege dazu eine Importtabelle an:
+Tankerkönig stellt in der Hitorie unter https://creativecommons.tankerkoenig.de/ Bestandsdaten zur Verfügung. Diese können importiert werden. Lege dazu eine Importtabelle an:
 
 ```
 CREATE TABLE `import` (
@@ -37,7 +37,7 @@ INSERT INTO prices (
 SELECT UUID(), st.ID, 'e10', im.e10, im.datetime, im.datetime FROM `import` im 
 LEFT JOIN stations st ON im.stationid = st.TKID
 WHERE e10change = 1 AND st.TKID IS NOT NULL
-)
+);
 
 -- Diesel
 
@@ -45,7 +45,7 @@ INSERT INTO prices (
 SELECT UUID(), st.ID, 'diesel', im.diesel, im.datetime, im.datetime FROM `import` im 
 LEFT JOIN stations st ON im.stationid = st.TKID
 WHERE dieselchange = 1 AND st.TKID IS NOT NULL
-)
+);
 ```
 
 Im Anschluss kann die import Tabelle wieder gelöscht werden.
