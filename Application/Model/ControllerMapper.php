@@ -3,13 +3,15 @@
 namespace Daniels\Benzinlogger\Application\Model;
 
 use Daniels\Benzinlogger\Application\Controller\bestPriceList;
+use Daniels\Benzinlogger\Application\Controller\priceTrend;
 use Daniels\Benzinlogger\Application\Controller\stationPriceList;
 
 class ControllerMapper
 {
     public $map = [
         'bestPriceList' => bestPriceList::class,
-        'stationPriceList' => stationPriceList::class
+        'stationPriceList' => stationPriceList::class,
+        'priceTrend' => priceTrend::class
     ];
 
     public function __construct()

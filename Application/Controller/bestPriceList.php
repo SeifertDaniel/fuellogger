@@ -38,5 +38,7 @@ class bestPriceList implements controllerInterface
             }
             echo "</table>";
         }
+
+        echo "<div><a href='index.php?cl=priceTrend'>Preisentwicklung</a>";
     }
 }
