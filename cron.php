@@ -9,12 +9,13 @@ use Daniels\Benzinlogger\Application\Model\Station;
 use Daniels\Benzinlogger\Core\Registry;
 use Dotenv\Dotenv;
 use Lang\Tankerking\ApiClient;
+use Lang\Tankerking\GasStation;
 
 require_once '../vendor/autoload.php';
 
 class cron
 {
-    protected $api;
+    protected ApiClient $api;
 
     public function __construct()
     {
@@ -69,7 +70,11 @@ class cron
         new BestPriceNotifier($updatePrices);
     }
 
-    public function getStations()
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getStations(): array
     {
         return $this->api->search(
             $_ENV['LOCATIONLAT'],
@@ -78,68 +83,17 @@ class cron
             4,
             ApiClient::SORT_DIST
         );
-/*
-        return [
-            '51d4b48a-a095-1aa0-e100-80009459e03a'  => [
-                'name'  => 'JET STOLLBERG ZU DEN TEICHEN 2',
-                'brand' => 'JET',
-                'dist'  => 0.6,
-                'price' => 2.139,
-                'street'    => 'ZU DEN TEICHEN',
-                'houseNumber'   => '2',
-                'postCode'  => '9366',
-                'place'     => 'STOLLBERG'
-            ],
-            '005056ba-7cb6-1ed2-bceb-c115e44f8d50'  => [
-                'name'  => 'star Tankstelle',
-                'brand' => 'STAR',
-                'dist'  => 1.3,
-                'price' => 2.139,
-                'street'    => 'Hohensteiner Straße',
-                'houseNumber'   => '58',
-                'postCode'  => '9366',
-                'place'     => 'Stollberg'
-            ]
-        ];
-*/
     }
 
-    public function getDetails($stationId)
+    /**
+     * @param $stationId
+     *
+     * @return GasStation
+     * @throws \Exception
+     */
+    public function getDetails($stationId): GasStation
     {
         return $this->api->detail($stationId);
-/*
-        $details = new \stdClass();
-        $details->id = '51d4b48a-a095-1aa0-e100-80009459e03a';
-        $details->name = 'JET STOLLBERG ZU DEN TEICHEN 2';
-        $details->brand = 'JET';
-        $details->street = 'ZU DEN TEICHEN';
-        $details->houseNumber = '2';
-        $details->postCode = '9366';
-        $details->place = 'STOLLBERG';
-        $details->openingTimes = [
-            [
-                'text' => 'täglich ausser Sonn- und Feiertagen',
-                'start' => '06:00:00',
-                'end'   => '22:00:00'
-            ],
-            [
-                'text'  => 'Sonntag, Feiertag',
-                'start' => '07:00:00',
-                'end'   => '22:00:00'
-            ]
-        ];
-        $details->overrides = [];
-        $details->wholeDay  = null;
-        $details->isOpen    = 1;
-        $details->e5    = 2.199;
-        $details->e10   = 2.139;
-        $details->diesel = 2.309;
-        $details->lat   = 50.7162;
-        $details->lng   = 12.782923;
-        $details->state = 'deSN';
-
-        return $details;
-*/
     }
 }
 
