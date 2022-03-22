@@ -9,7 +9,7 @@ abstract class AbstractNotifier implements NotifierInterface
 {
     protected array $filters = [];
 
-    public function setFilter(AbstractFilter $filter): self
+    public function addFilter(AbstractFilter $filter): self
     {
         $this->filters[] = $filter;
 
