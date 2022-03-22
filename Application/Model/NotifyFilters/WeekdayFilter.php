@@ -14,13 +14,22 @@ class WeekdayFilter extends AbstractFilter
     const SATURDAY = 6;
     const SUNDAY = 7;
 
-    protected $weekdays = [];
+    protected array $weekdays = [];
 
+    /**
+     * @param array $weekdays
+     */
     public function __construct(array $weekdays)
     {
         $this->weekdays = $weekdays;
     }
 
+    /**
+     * @param       $fuelType
+     * @param float $price
+     *
+     * @return bool
+     */
     public function canNotifiy($fuelType, float $price) : bool
     {
         return in_array((new DateTime())->format('N'), $this->weekdays);

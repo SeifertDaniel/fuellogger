@@ -9,12 +9,22 @@ class DateFilter extends AbstractFilter
     public $from;
     public $till;
 
+    /**
+     * @param $from
+     * @param $till
+     */
     public function __construct($from, $till)
     {
         $this->from = $from;
         $this->till = $till;
     }
 
+    /**
+     * @param       $fuelType
+     * @param float $price
+     *
+     * @return bool
+     */
     public function canNotifiy($fuelType, float $price) : bool
     {
         $f = DateTime::createFromFormat('!Y-m-d', $this->from);
