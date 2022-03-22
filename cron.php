@@ -143,5 +143,9 @@ class cron
     }
 }
 
-$runner = new cron();
-$runner->addCurrent();
+try {
+    $runner = new cron();
+    $runner->addCurrent();
+} catch (\Exception $e) {
+    Registry::getLogger()->error($e->getMessage());
+}
