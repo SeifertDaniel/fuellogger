@@ -15,7 +15,7 @@
 
 namespace Daniels\Benzinlogger\Application\Model;
 
-use Lang\Tankerking\ApiClient;
+use DanielS\Tankerkoenig\ApiClient;
 
 class Fuel
 {
