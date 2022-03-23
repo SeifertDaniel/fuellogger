@@ -8,6 +8,7 @@ use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Application\Model\Station;
 use Daniels\Benzinlogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
+use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\GasStation;
 use Dotenv\Dotenv;
 
