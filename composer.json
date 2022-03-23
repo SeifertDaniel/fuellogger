@@ -15,7 +15,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Daniels\\FuelLogger\\": "src/"
+            "Daniels\\FuelLogger\\": "src/",
+            "Daniels\\FuelLogger\\PublicDir\\": "src/Public/"
         }
     },
     "authors": [
@@ -23,5 +24,9 @@
             "name": "Daniel Seifert",
             "email": "git@daniel-seifert.com"
         }
+    ],
+    "bin": [
+        "src/bin/fuelPricesCron",
+        "src/bin/oilPricesCron"
     ]
 }

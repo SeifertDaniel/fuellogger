@@ -1,6 +1,6 @@
 <?php
 
-namespace Daniels\Benzinlogger;
+namespace Daniels\Benzinlogger\PublicDir;
 
 use Daniels\Benzinlogger\Application\Model\BestPriceNotifier;
 use Daniels\Benzinlogger\Application\Model\Fuel;
@@ -8,19 +8,18 @@ use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Application\Model\Station;
 use Daniels\Benzinlogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
-use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\GasStation;
 use Dotenv\Dotenv;
 
-require_once '../vendor/autoload.php';
+require_once '../../vendor/autoload.php';
 
-class cron
+class fuelPricesCron
 {
     protected ApiClient $api;
 
     public function __construct()
     {
-        $dotenv = Dotenv::createImmutable(__DIR__."/..");
+        $dotenv = Dotenv::createImmutable(__DIR__."/../..");
         $dotenv->load();
         $dotenv->required(['DBHOST', 'DBNAME', 'DBUSER', 'DBPASS', 'DBDRIVER', 'TKAPIKEY', 'LOCATIONLAT', 'LOCATIONLNG'])->notEmpty();
 
@@ -55,6 +54,7 @@ class cron
             $price = new Price();
 
             foreach (Fuel::getTypes() as $type) {
+                $updatePrices[$type] = [];
                 if ($price->getLastPrice($stationId, $type) != $stationData[$type]) {
                     $price->insert(
                         $stationId,
@@ -99,7 +99,7 @@ class cron
 }
 
 try {
-    $runner = new cron();
+    $runner = new fuelPricesCron();
     $runner->addCurrent();
 } catch (\Exception $e) {
     Registry::getLogger()->error($e->getMessage());
