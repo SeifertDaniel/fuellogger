@@ -37,10 +37,10 @@ class Logger
      */
     public function pushHandler(MonologLogger $logger): MonologLogger
     {
-        $logger->pushHandler(new RotatingFileHandler('log/debug.log', 5, MonologLogger::DEBUG, false));
-        $logger->pushHandler(new RotatingFileHandler('log/error.log', 10, MonologLogger::ERROR));
+        $logger->pushHandler(new RotatingFileHandler($_ENV['ROOTDIR'].'src/log/debug.log', 5, MonologLogger::DEBUG, false));
+        $logger->pushHandler(new RotatingFileHandler($_ENV['ROOTDIR'].'src/log/error.log', 10, MonologLogger::ERROR));
 
-        $infoStreamHandler = new RotatingFileHandler('log/info.log', 5, MonologLogger::INFO);
+        $infoStreamHandler = new RotatingFileHandler($_ENV['ROOTDIR'].'src/log/info.log', 5, MonologLogger::INFO);
         $infoFilterHandler = new FilterHandler(
             $infoStreamHandler,
             MonologLogger::INFO,
