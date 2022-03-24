@@ -8,6 +8,7 @@ use Daniels\Benzinlogger\Application\Model\Price;
 use Daniels\Benzinlogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
+use Exception;
 use ezcGraph;
 use ezcGraphArrayDataSet;
 use ezcGraphAxisRotatedLabelRenderer;
@@ -68,7 +69,7 @@ class priceTrend implements controllerInterface
                                                                  'green' => 255,
                                                                  'blue'  => 255,
                                                                  'alpha' => 255
-                                                               ] );;
+                                                               ] );
 
             // data
             foreach ( $allStats as $fuelType => $data ) {
@@ -84,7 +85,7 @@ class priceTrend implements controllerInterface
             $graph->data[ ucfirst( 'brent' ) ]->yAxis = $nAxis;
 
             $graph->renderToOutput( 1000, 400 );
-        } catch (\Exception $e) {
+        } catch ( Exception $e) {
             Registry::getLogger()->error($e->getMessage());
         }
 
