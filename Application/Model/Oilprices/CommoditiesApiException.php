@@ -2,4 +2,7 @@
 
 namespace Daniels\Benzinlogger\Application\Model\Oilprices;
 
-class CommoditiesApiException extends \Exception {}
+use Exception as ExceptionAlias;
+
+class CommoditiesApiException extends ExceptionAlias
+{}

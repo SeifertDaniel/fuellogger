@@ -13,7 +13,7 @@ class NotifierList
 {
     public function getList()
     {
-        $list = [
+        return [
             new DebugNotifier(),
             (new Ifttt($_ENV['C001_IFTTT_URL'])),
             (new WhatsApp($_ENV['C001_WHAPP_PHONE'], $_ENV['C001_WHAPP_APIK']))
@@ -21,7 +21,5 @@ class NotifierList
                 ->addFilter(new FuelTypeFilter([Fuel::TYPE_E10]))
                 ->addFilter(new DailyBestPriceFilter())
         ];
-
-        return $list;
     }
 }

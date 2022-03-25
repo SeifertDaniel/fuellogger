@@ -2,6 +2,8 @@
 
 namespace Daniels\Benzinlogger\Application\Model\Oilprices;
 
+use stdClass;
+
 class CommoditiesApi
 {
     const SYMBOL_RICE = 'RICE';
@@ -30,7 +32,12 @@ class CommoditiesApi
         $this->apiKey = $apiKey;
     }
 
-    public function request(array $symbols)
+    /**
+     * @param array $symbols
+     * @return mixed
+     * @throws CommoditiesApiException
+     */
+    public function request(array $symbols): mixed
     {
         $url = 'https://www.commodities-api.com/api/latest?access_key='.$this->apiKey;
         $url .= '&base='.$this->currencyBase;
@@ -42,7 +49,7 @@ class CommoditiesApi
             throw new CommoditiesApiException( "FEHLER - Die Commodities-API konnte nicht abgefragt werden!" );
         }
 
-        /** @var \stdClass $data */
+        /** @var stdClass $data */
         $data = json_decode( $json );
 
         if ( $data->data->success !== true ) {
