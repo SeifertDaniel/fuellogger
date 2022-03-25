@@ -3,7 +3,7 @@
     "type": "library",
     "require": {
         "doctrine/dbal": "^3",
-        "daniels/tankerkoenig-php-client": "dev-master",
+        "daniels/tankerkoenig-php-client": "^1.0",
         "ramsey/uuid": "^4.2",
         "ramsey/uuid-doctrine": "^1.8",
         "guzzlehttp/guzzle": "^7.4",
