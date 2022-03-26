@@ -2,6 +2,9 @@
 
 namespace Daniels\Benzinlogger\Application\Model\Notifier;
 
+use Daniels\Benzinlogger\Core\Registry;
+use GuzzleHttp\Client;
+
 /**
  * https://www.callmebot.com/
  */
@@ -25,24 +28,24 @@ class CallMeBot extends AbstractNotifier implements NotifierInterface
      */
     public function notify($fuelType, $price, $stations) : bool
     {
-        if (false === $this->canNotify($fuelType, $price)) {
-            return false;
+        try {
+            if (false === $this->canNotify($fuelType, $price)) {
+                return false;
+            }
+
+            $message = 'Preis ' . ucfirst($fuelType) . ': ' . $price . ' ' . $stations;
+
+            $url = 'https://api.callmebot.com/whatsapp.php?source=php&phone=' . $this->phoneNumber . '&text=' . urlencode($message) . '&apikey=' . $this->apiKey;
+
+            $client = new Client();
+            $response = $client->get($url);
+
+            $return = $response->getStatusCode() == 200;
+        } catch (\Exception $e) {
+            Registry::getLogger()->error($e->getMessage());
+            $return = false;
         }
 
-        $message = 'Preis '.ucfirst($fuelType).': '.$price.' '.$stations;
-
-        $url='https://api.callmebot.com/whatsapp.php?source=php&phone='.$this->phoneNumber.'&text='.urlencode($message).'&apikey='.$this->apiKey;
-
-        if($ch = curl_init($url))
-        {
-            curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_exec($ch);
-            $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            return (bool) $status;
-        } else {
-            return false;
-        }
+        return $return;
     }
 }
