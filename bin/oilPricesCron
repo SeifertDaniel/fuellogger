@@ -1,4 +1,4 @@
 #!/usr/bin/env php
 <?php
 
-require('../Public/oilPricesCron.php');
+require(__DIR__.'/../Public/oilPricesCron.php');

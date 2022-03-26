@@ -12,7 +12,7 @@ use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\GasStation;
 use Dotenv\Dotenv;
 
-require_once '../../vendor/autoload.php';
+require_once __DIR__.'/../../vendor/autoload.php';
 
 class fuelPricesCron
 {

@@ -8,7 +8,7 @@ use Daniels\Benzinlogger\Core\Registry;
 use DateTime;
 use Dotenv\Dotenv;
 
-require_once '../../vendor/autoload.php';
+require_once __DIR__.'/../../vendor/autoload.php';
 
 class oilPricesCron
 {
