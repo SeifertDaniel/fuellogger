@@ -9,8 +9,10 @@ use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
 use DanielS\Tankerkoenig\ApiException;
-use DanielS\Tankerkoenig\GasStation;
+use DanielS\Tankerkoenig\PetrolStation;
 use Dotenv\Dotenv;
+use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 
 require_once __DIR__.'/../../vendor/autoload.php';
 
@@ -27,6 +29,11 @@ class fuelPricesCron
         $this->api = new ApiClient($_ENV['TKAPIKEY']);
     }
 
+    /**
+     * @return void
+     * @throws ApiException
+     * @throws GuzzleException
+     */
     public function addCurrent()
     {
         $updatePrices = [];
@@ -75,6 +82,7 @@ class fuelPricesCron
     /**
      * @return array
      * @throws ApiException
+     * @throws GuzzleException
      */
     public function getStations(): array
     {
@@ -90,10 +98,11 @@ class fuelPricesCron
     /**
      * @param $stationId
      *
-     * @return GasStation
+     * @return PetrolStation
      * @throws ApiException
+     * @throws GuzzleException
      */
-    public function getDetails($stationId): GasStation
+    public function getDetails($stationId): PetrolStation
     {
         return $this->api->detail($stationId);
     }
@@ -102,6 +111,6 @@ class fuelPricesCron
 try {
     $runner = new fuelPricesCron();
     $runner->addCurrent();
-} catch (\Exception $e) {
+} catch (Exception|GuzzleException $e) {
     Registry::getLogger()->error($e->getMessage());
 }
