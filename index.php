@@ -31,7 +31,9 @@ class index
             $callRender = !call_user_func_array([$controller, $fnc], []);
         }
         if ($callRender) {
-            $controller->render();
+            $tpl = $controller->render();
+            $template = Registry::getTwig()->load($tpl);
+            echo $template->render();
         }
     }
 }

@@ -16,6 +16,8 @@
 namespace Daniels\FuelLogger\Core;
 
 use Daniels\FuelLogger\Application\Model\Logger;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class Registry
 {
@@ -58,6 +60,23 @@ class Registry
             self::set('logger', (new Logger())->getLogger());
         }
         return self::get('logger');
+    }
+
+    /**
+     * @return Environment
+     */
+    public static function getTwig(): Environment
+    {
+        if (!self::instanceExists('twig')) {
+            $loader = new FilesystemLoader($_ENV['ROOTDIR'].'src/Templates');
+            $twig = new Environment($loader, [
+                'cache' => $_ENV['ROOTDIR'].'tmp/twig',
+                'debug' => (bool) $_ENV['DEBUGMODE']
+            ]);
+
+            self::set('twig', $twig);
+        }
+        return self::get('twig');
     }
 
     public static function getKeys()

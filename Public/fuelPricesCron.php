@@ -69,6 +69,7 @@ class fuelPricesCron
                         $type,
                         $stationData[$type]
                     );
+
                     $updatePrices[$type][] = $stationData[$type];
                 }
             }

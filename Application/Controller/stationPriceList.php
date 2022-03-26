@@ -50,78 +50,53 @@ class stationPriceList implements controllerInterface
             ));
         $stationName = $qbs->fetchOne();
 
-        echo "<h1>".$stationName."</h1>";
-
-        echo '<img src="'.Registry::getRequest()->getRequestUrl().'&amp;fnc=getGraph'.'">';
-
         $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
         $conn = DBConnection::getConnection();
 
+        $priceStats = [];
         foreach (Fuel::getTypes() as $type) {
-
             $pricestat = new PriceStatistics();
             $qb = $pricestat->getLowPriceStatsByStation($stationId, $type);
+            $priceStats[$type] = $qb->fetchAllAssociative();
+        }
 
-            echo "<h1>".ucfirst($type)."</h1>";
-            echo "<table style='border: 1px solid silver'>";
-            echo "<tr>";
-            echo "<th>Datum</th>";
-            echo "<th>durchschn. Erh&ouml;hung</th>";
-            echo "<th>durchschn. Haltezeit Tiefpreis</th>";
-            echo "</tr>";
-
-            foreach ($qb->fetchAllAssociative() as $statItem) {
-                echo "<tr>";
-                echo "<td>".$statItem['date']."</td>";
-                echo "<td>".$statItem['pricediff']."</td>";
-                echo "<td>".$statItem['timediff']." Min.</td>";
-                echo "</tr>";
-            }
-            echo "</table>";
-
+        $priceList = [];
+        foreach (Fuel::getTypes() as $type) {
             $qb = $conn->createQueryBuilder();
 
             $prices = new Price();
             $priceTable = $prices->getCoreTableName();
 
             $qb->select("DATE_FORMAT(t1.datetime, '%d.%m. %H:%i') ts1", "DATE_FORMAT(IF(min(t2.datetime) IS NULL, NOW(), min(t2.datetime)), '%d.%m %H:%i') ts2", "t1.price")
-               ->from($priceTable, 't1')
-               ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime and t1.type = t2.type')
-               ->where(
-                   $qb->expr()->and(
-                       $qb->expr()->eq(
-                           't1.stationid',
-                           $qb->createNamedParameter($stationId)
-                       ),
-                       $qb->expr()->eq(
-                           't1.type',
-                           $qb->createNamedParameter($type)
-                       ),
-                       $qb->expr()->gt(
-                           't1.datetime',
-                           'date_sub(NOW(), interval 1 day)'
-                       )
-                   )
-               )
-               ->groupBy('t1.stationid', 't1.datetime')
-               ->orderBy('ts1', 'DESC');
-
-            echo "<table style='border: 1px solid silver'>";
-            echo "<tr>";
-            echo "<th>von</th>";
-            echo "<th>bis</th>";
-            echo "<th>Preis</th>";
-            echo "</tr>";
-
-            foreach ($qb->fetchAllAssociative() as $priceItem) {
-                echo "<tr>";
-                echo "<td>".$priceItem['ts1']."</td>";
-                echo "<td>".$priceItem['ts2']."</td>";
-                echo "<td>".$priceItem['price']."</td>";
-                echo "</tr>";
-            }
-            echo "</table>";
+                ->from($priceTable, 't1')
+                ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime and t1.type = t2.type')
+                ->where(
+                    $qb->expr()->and(
+                        $qb->expr()->eq(
+                            't1.stationid',
+                            $qb->createNamedParameter($stationId)
+                        ),
+                        $qb->expr()->eq(
+                            't1.type',
+                            $qb->createNamedParameter($type)
+                        ),
+                        $qb->expr()->gt(
+                            't1.datetime',
+                            'date_sub(NOW(), interval 1 day)'
+                        )
+                    )
+                )
+                ->groupBy('t1.stationid', 't1.datetime')
+                ->orderBy('ts1', 'DESC');
+            $priceList[$type] = $qb->fetchAllAssociative();
         }
+
+        Registry::getTwig()->addGlobal('stationName', $stationName);
+        Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
+        Registry::getTwig()->addGlobal('priceStats', $priceStats);
+        Registry::getTwig()->addGlobal('priceList', $priceList);
+
+        return 'pages/stationPriceList.html.twig';
     }
 
     public function getGraph()

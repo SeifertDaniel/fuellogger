@@ -28,8 +28,9 @@ class priceTrend implements controllerInterface
 
     public function render()
     {
-        echo "<h1>Preishistorie</h1>";
-        echo '<img src="'.Registry::getRequest()->getRequestUrl().'&amp;fnc=getGraph'.'">';
+        Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
+
+        return 'pages/priceTrend.html.twig';
     }
 
     /**

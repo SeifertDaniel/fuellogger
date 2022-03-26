@@ -1,0 +1,27 @@
+{% for fuelType,priceList in fuelPrices %}
+    <h1>{{ fuelType|capitalize }}</h1>
+
+    <table style='border: 1px solid silver'>
+        <tr>
+            <th>Tankstelle</th>
+            <th>Ort</th>
+            <th>aktueller Preis</th>
+            <th>&Auml;nderung vor (Std:Min)</th>
+            <th>Historie</th>
+        </tr>
+
+        {% for priceItem in priceList %}
+            <tr>
+                <td>{{ priceItem.name }}</td>
+                <td>{{ priceItem.place }}</td>
+                <td>{{ priceItem.price }}</td>
+                <td>{{ priceItem.timediff }}</td>
+                <td><a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>Entwicklung</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endfor %}
+
+<div>
+    <a href='index.php?cl=priceTrend'>Preisentwicklung</a>
+</div>
