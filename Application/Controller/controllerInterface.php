@@ -1,6 +1,6 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Controller;
+namespace Daniels\FuelLogger\Application\Controller;
 
 interface controllerInterface
 {

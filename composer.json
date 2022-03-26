@@ -15,8 +15,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Daniels\\FuelLogger\\": "src/",
-            "Daniels\\FuelLogger\\PublicDir\\": "src/Public/"
+            "Daniels\\FuelLogger\\": "/",
+            "Daniels\\FuelLogger\\PublicDir\\": "/Public/"
         }
     },
     "authors": [

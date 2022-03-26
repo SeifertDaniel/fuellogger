@@ -1,11 +1,11 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Controller;
+namespace Daniels\FuelLogger\Application\Controller;
 
-use Daniels\Benzinlogger\Application\Model\DBConnection;
-use Daniels\Benzinlogger\Application\Model\OilPrice;
-use Daniels\Benzinlogger\Application\Model\Price;
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\OilPrice;
+use Daniels\FuelLogger\Application\Model\Price;
+use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Exception;

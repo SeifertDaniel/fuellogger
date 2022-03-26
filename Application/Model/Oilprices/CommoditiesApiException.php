@@ -1,6 +1,6 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\Oilprices;
+namespace Daniels\FuelLogger\Application\Model\Oilprices;
 
 use Exception as ExceptionAlias;
 

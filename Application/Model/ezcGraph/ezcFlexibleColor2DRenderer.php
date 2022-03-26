@@ -13,7 +13,7 @@
  * @link          http://www.oxidmodule.com
  */
 
-namespace Daniels\Benzinlogger\Application\Model\ezcGraph;
+namespace Daniels\FuelLogger\Application\Model\ezcGraph;
 
 use ezcGraph;
 use ezcGraphBoundings;

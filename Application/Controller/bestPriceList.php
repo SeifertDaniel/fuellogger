@@ -1,9 +1,9 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Controller;
+namespace Daniels\FuelLogger\Application\Controller;
 
-use Daniels\Benzinlogger\Application\Model\BestPrice;
-use Daniels\Benzinlogger\Application\Model\Fuel;
+use Daniels\FuelLogger\Application\Model\BestPrice;
+use Daniels\FuelLogger\Application\Model\Fuel;
 
 class bestPriceList implements controllerInterface
 {

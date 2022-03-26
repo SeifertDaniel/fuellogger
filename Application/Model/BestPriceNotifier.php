@@ -1,10 +1,10 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model;
+namespace Daniels\FuelLogger\Application\Model;
 
-use Daniels\Benzinlogger\Application\Model\Notifier\NotifierInterface;
-use Daniels\Benzinlogger\Application\Model\Notifier\NotifierList;
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\Notifier\NotifierInterface;
+use Daniels\FuelLogger\Application\Model\Notifier\NotifierList;
+use Daniels\FuelLogger\Core\Registry;
 
 class BestPriceNotifier
 {

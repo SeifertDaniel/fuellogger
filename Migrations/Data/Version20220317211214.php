@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Daniels\Benzinlogger\Migrations\Data;
+namespace Daniels\FuelLogger\Migrations\Data;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;

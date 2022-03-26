@@ -13,10 +13,10 @@
  * @link          http://www.oxidmodule.com
  */
 
-namespace Daniels\Benzinlogger\Application\Model\NotifyFilters;
+namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
-use Daniels\Benzinlogger\Application\Model\DBConnection;
-use Daniels\Benzinlogger\Application\Model\Price;
+use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Price;
 use Doctrine\DBAL\Exception;
 
 class DailyBestPriceFilter extends AbstractFilter

@@ -1,6 +1,6 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model;
+namespace Daniels\FuelLogger\Application\Model;
 
 use DateTime;
 use Doctrine\DBAL\ParameterType;

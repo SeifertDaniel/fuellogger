@@ -1,6 +1,6 @@
 <?php
 
-namespace Daniels\Benzinlogger\Core;
+namespace Daniels\FuelLogger\Core;
 
 class Request
 {

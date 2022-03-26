@@ -1,10 +1,10 @@
 <?php
 
-namespace Daniels\Benzinlogger\PublicDir;
+namespace Daniels\FuelLogger\PublicDir;
 
-use Daniels\Benzinlogger\Application\Model\OilPrice;
-use Daniels\Benzinlogger\Application\Model\Oilprices\CommoditiesApi;
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\OilPrice;
+use Daniels\FuelLogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApi;
 use DateTime;
 use Dotenv\Dotenv;
 

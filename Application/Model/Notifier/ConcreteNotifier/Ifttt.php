@@ -1,7 +1,7 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\Notifier\ConcreteNotifier;
+namespace Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier;
 
-use Daniels\Benzinlogger\Application\Model\Notifier\WebHook;
+use Daniels\FuelLogger\Application\Model\Notifier\WebHook;
 
 class Ifttt extends WebHook {}

@@ -1,8 +1,8 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\Notifier;
+namespace Daniels\FuelLogger\Application\Model\Notifier;
 
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Core\Registry;
 use GuzzleHttp\Client;
 
 /**

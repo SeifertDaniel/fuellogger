@@ -13,7 +13,7 @@
  * @link          http://www.oxidmodule.com
  */
 
-namespace Daniels\Benzinlogger\Application\Model;
+namespace Daniels\FuelLogger\Application\Model;
 
 use DanielS\Tankerkoenig\ApiClient;
 

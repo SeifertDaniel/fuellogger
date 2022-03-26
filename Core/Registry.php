@@ -13,9 +13,9 @@
  * @link          http://www.oxidmodule.com
  */
 
-namespace Daniels\Benzinlogger\Core;
+namespace Daniels\FuelLogger\Core;
 
-use Daniels\Benzinlogger\Application\Model\Logger;
+use Daniels\FuelLogger\Application\Model\Logger;
 
 class Registry
 {

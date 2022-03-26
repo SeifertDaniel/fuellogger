@@ -1,16 +1,16 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Controller;
+namespace Daniels\FuelLogger\Application\Controller;
 
-use Daniels\Benzinlogger\Application\Model\DBConnection;
-use Daniels\Benzinlogger\Application\Model\ezcGraph\ezcFlexibleColor2DRenderer;
-use Daniels\Benzinlogger\Application\Model\ezcGraph\ezcGraphArrayDataSetOpneningTimesColors;
-use Daniels\Benzinlogger\Application\Model\Fuel;
-use Daniels\Benzinlogger\Application\Model\openingTimes;
-use Daniels\Benzinlogger\Application\Model\Price;
-use Daniels\Benzinlogger\Application\Model\PriceStatistics;
-use Daniels\Benzinlogger\Application\Model\Station;
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\ezcGraph\ezcFlexibleColor2DRenderer;
+use Daniels\FuelLogger\Application\Model\ezcGraph\ezcGraphArrayDataSetOpneningTimesColors;
+use Daniels\FuelLogger\Application\Model\Fuel;
+use Daniels\FuelLogger\Application\Model\openingTimes;
+use Daniels\FuelLogger\Application\Model\Price;
+use Daniels\FuelLogger\Application\Model\PriceStatistics;
+use Daniels\FuelLogger\Application\Model\Station;
+use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Exception;

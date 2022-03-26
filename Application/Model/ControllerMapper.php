@@ -1,10 +1,10 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model;
+namespace Daniels\FuelLogger\Application\Model;
 
-use Daniels\Benzinlogger\Application\Controller\bestPriceList;
-use Daniels\Benzinlogger\Application\Controller\priceTrend;
-use Daniels\Benzinlogger\Application\Controller\stationPriceList;
+use Daniels\FuelLogger\Application\Controller\bestPriceList;
+use Daniels\FuelLogger\Application\Controller\priceTrend;
+use Daniels\FuelLogger\Application\Controller\stationPriceList;
 
 class ControllerMapper
 {

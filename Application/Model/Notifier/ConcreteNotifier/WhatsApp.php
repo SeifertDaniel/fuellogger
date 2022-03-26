@@ -1,7 +1,7 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\Notifier\ConcreteNotifier;
+namespace Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier;
 
-use Daniels\Benzinlogger\Application\Model\Notifier\CallMeBot;
+use Daniels\FuelLogger\Application\Model\Notifier\CallMeBot;
 
 class WhatsApp extends CallMeBot {}

@@ -10,7 +10,7 @@ return [
     ],
 
     'migrations_paths' => [
-        'Daniels\Benzinlogger\Migrations\Data' => './src/Migrations/Data'
+        'Daniels\FuelLogger\Migrations\Data' => './src/Migrations/Data'
     ],
 
     'all_or_nothing' => true,

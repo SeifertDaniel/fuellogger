@@ -1,13 +1,13 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\Notifier;
+namespace Daniels\FuelLogger\Application\Model\Notifier;
 
-use Daniels\Benzinlogger\Application\Model\Fuel;
-use Daniels\Benzinlogger\Application\Model\Notifier\ConcreteNotifier\Ifttt;
-use Daniels\Benzinlogger\Application\Model\Notifier\ConcreteNotifier\WhatsApp;
-use Daniels\Benzinlogger\Application\Model\NotifyFilters\DailyBestPriceFilter;
-use Daniels\Benzinlogger\Application\Model\NotifyFilters\FuelTypeFilter;
-use Daniels\Benzinlogger\Application\Model\NotifyFilters\TimeFilter;
+use Daniels\FuelLogger\Application\Model\Fuel;
+use Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier\Ifttt;
+use Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier\WhatsApp;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\DailyBestPriceFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\FuelTypeFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\TimeFilter;
 
 class NotifierList
 {

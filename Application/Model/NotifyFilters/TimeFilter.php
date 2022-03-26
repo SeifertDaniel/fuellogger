@@ -1,6 +1,6 @@
 <?php
 
-namespace Daniels\Benzinlogger\Application\Model\NotifyFilters;
+namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use DateTime;
 

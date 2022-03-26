@@ -1,12 +1,12 @@
 <?php
 
-namespace Daniels\Benzinlogger\PublicDir;
+namespace Daniels\FuelLogger\PublicDir;
 
-use Daniels\Benzinlogger\Application\Model\BestPriceNotifier;
-use Daniels\Benzinlogger\Application\Model\Fuel;
-use Daniels\Benzinlogger\Application\Model\Price;
-use Daniels\Benzinlogger\Application\Model\Station;
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\BestPriceNotifier;
+use Daniels\FuelLogger\Application\Model\Fuel;
+use Daniels\FuelLogger\Application\Model\Price;
+use Daniels\FuelLogger\Application\Model\Station;
+use Daniels\FuelLogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
 use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\GasStation;

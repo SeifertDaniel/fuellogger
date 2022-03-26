@@ -1,10 +1,10 @@
 <?php
 
-namespace Daniels\Benzinlogger;
+namespace Daniels\FuelLogger;
 
-use Daniels\Benzinlogger\Application\Controller\controllerInterface;
-use Daniels\Benzinlogger\Application\Model\ControllerMapper;
-use Daniels\Benzinlogger\Core\Registry;
+use Daniels\FuelLogger\Application\Controller\controllerInterface;
+use Daniels\FuelLogger\Application\Model\ControllerMapper;
+use Daniels\FuelLogger\Core\Registry;
 use Dotenv\Dotenv;
 
 require_once '../vendor/autoload.php';
