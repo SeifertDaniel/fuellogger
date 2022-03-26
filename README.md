@@ -1,3 +1,9 @@
+## Installation
+
+```
+./vendor/bin/doctrine-migrations migrations:migrate --configuration ./src/Migrations/migrations.php --db-configuration ./src/Migrations/migrations_db.php
+```
+
 ## importieren von Bestandsdaten
 
 Tankerkönig stellt in der Hitorie unter https://creativecommons.tankerkoenig.de/ Bestandsdaten zur Verfügung. Diese können importiert werden. Lege dazu eine Importtabelle an:
