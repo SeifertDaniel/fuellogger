@@ -39,11 +39,12 @@ class BestPriceNotifier
                ->setMaxResults(1);
 
             $lowestUpdatePrice = $this->getLowestUpdatePrice($type);
+
             Registry::getLogger()->debug(__METHOD__.__LINE__);
             Registry::getLogger()->debug($type .' => '.$qb->fetchOne().' > '.$lowestUpdatePrice);
-            Registry::getLogger()->debug($qb->getSQL());
-            Registry::getLogger()->debug($qb->getParameters());
+
             if (isset($lowestUpdatePrice) && $qb->fetchOne() > $lowestUpdatePrice) {
+                Registry::getLogger()->debug(__METHOD__.__LINE__);
                 $this->notify($lowestUpdatePrice, $type);
             }
         }
@@ -69,6 +70,8 @@ class BestPriceNotifier
 
         /** @var NotifierInterface $notifier */
         foreach((new NotifierList())->getList() as $notifier) {
+            Registry::getLogger()->debug(__METHOD__.__LINE__);
+            Registry::getLogger()->debug(get_class($notifier));
             $notifier->notify(
                 $type,
                 $bestPrice,
