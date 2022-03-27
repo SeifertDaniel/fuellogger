@@ -1,27 +1,35 @@
-{% for fuelType,priceList in fuelPrices %}
-    <h1>{{ fuelType|capitalize }}</h1>
+{% extends "base.html.twig" %}
 
-    <table style='border: 1px solid silver'>
-        <tr>
-            <th>Tankstelle</th>
-            <th>Ort</th>
-            <th>aktueller Preis</th>
-            <th>&Auml;nderung vor (Std:Min)</th>
-            <th>Historie</th>
-        </tr>
+{% block title %}Preis&uuml;bersicht{% endblock %}
 
-        {% for priceItem in priceList %}
+{% block content %}
+    <h1>Preis&uuml;bersicht</h1>
+
+    {% for fuelType,priceList in fuelPrices %}
+        <h2>{{ fuelType|capitalize }}</h2>
+
+        <table style='border: 1px solid silver'>
             <tr>
-                <td>{{ priceItem.name }}</td>
-                <td>{{ priceItem.place }}</td>
-                <td>{{ priceItem.price }}</td>
-                <td>{{ priceItem.timediff }}</td>
-                <td><a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>Entwicklung</a></td>
+                <th>Tankstelle</th>
+                <th>Ort</th>
+                <th>aktueller Preis</th>
+                <th>&Auml;nderung vor (Std:Min)</th>
+                <th>Historie</th>
             </tr>
-        {% endfor %}
-    </table>
-{% endfor %}
 
-<div>
-    <a href='index.php?cl=priceTrend'>Preisentwicklung</a>
-</div>
+            {% for priceItem in priceList %}
+                <tr>
+                    <td>{{ priceItem.name }}</td>
+                    <td>{{ priceItem.place }}</td>
+                    <td>{{ priceItem.price }}</td>
+                    <td>{{ priceItem.timediff }}</td>
+                    <td><a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>Entwicklung</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+
+    <div>
+        <a href='index.php?cl=priceTrend'>Preisentwicklung</a>
+    </div>
+{% endblock %}

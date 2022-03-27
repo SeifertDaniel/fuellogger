@@ -1,41 +1,47 @@
-<h1>{{ stationName }}</h1>
+{% extends "base.html.twig" %}
 
-<img src="{{ requestUrl|replace({"&amp;": "&"}) }}&amp;fnc=getGraph">
+{% block title %}{{ stationName }}{% endblock %}
 
-{% for fuelType,statList in priceStats %}
-    <h1>{{ fuelType|capitalize }}</h1>
+{% block content %}
+    <h1>{{ stationName }}</h1>
 
-    <table style='border: 1px solid silver'>
-        <tr>
-            <th>Datum</th>
-            <th>durchschn. Erh&ouml;hung</th>
-            <th>durchschn. Haltezeit Tiefpreis</th>
-        </tr>
+    <img src="{{ requestUrl|replace({"&amp;": "&"}) }}&amp;fnc=getGraph">
 
-        {% for statItem in statList %}
+    {% for fuelType,statList in priceStats %}
+        <h2>{{ fuelType|capitalize }}</h2>
+
+        <table style='border: 1px solid silver'>
             <tr>
-                <td>{{ statItem.date }}</td>
-                <td>{{ statItem.pricediff }}</td>
-                <td>{{ statItem.timediff }} Min.</td>
+                <th>Datum</th>
+                <th>durchschn. Erh&ouml;hung</th>
+                <th>durchschn. Haltezeit Tiefpreis</th>
             </tr>
-        {% endfor %}
-    </table>
-{% endfor %}
 
-{% for fuelType,priceItems in priceList %}
-    <table style='border: 1px solid silver'>
-        <tr>
-            <th>von</th>
-            <th>bis</th>
-            <th>Preis</th>
-        </tr>
+            {% for statItem in statList %}
+                <tr>
+                    <td>{{ statItem.date }}</td>
+                    <td>{{ statItem.pricediff }}</td>
+                    <td>{{ statItem.timediff }} Min.</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
 
-        {% for priceItem in priceItems %}
+    {% for fuelType,priceItems in priceList %}
+        <table style='border: 1px solid silver'>
             <tr>
-                <td>{{ priceItem.ts1 }}</td>
-                <td>{{ priceItem.ts2 }}</td>
-                <td>{{ priceItem.price }}</td>
+                <th>von</th>
+                <th>bis</th>
+                <th>Preis</th>
             </tr>
-        {% endfor %}
-    </table>
-{% endfor %}
+
+            {% for priceItem in priceItems %}
+                <tr>
+                    <td>{{ priceItem.ts1 }}</td>
+                    <td>{{ priceItem.ts2 }}</td>
+                    <td>{{ priceItem.price }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+{% endblock %}
