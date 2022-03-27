@@ -11,8 +11,7 @@
         "monolog/monolog": "^2.3",
         "doctrine/migrations": "^3.4",
         "zetacomponents/graph":"^1.5",
-        "twig/twig":"^3.3",
-        "twbs/bootstrap":"^5.1"
+        "twig/twig":"^3.3"
     },
     "license": "MIT",
     "autoload": {
