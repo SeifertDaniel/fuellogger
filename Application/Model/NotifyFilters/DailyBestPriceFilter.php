@@ -8,6 +8,27 @@ use Doctrine\DBAL\Exception;
 
 class DailyBestPriceFilter extends AbstractFilter
 {
+    protected array $filters = [];
+
+    /**
+     * @param DatabaseQueryFilter $filter
+     * @return $this
+     */
+    public function addQueryFilter(DatabaseQueryFilter $filter): self
+    {
+        $this->filters[] = $filter;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryFilters(): array
+    {
+        return $this->filters;
+    }
+
     /**
      * @param string $fuelType
      * @param float $price
@@ -37,11 +58,28 @@ class DailyBestPriceFilter extends AbstractFilter
                     $qb->expr()->eq(
                         'pr.type',
                         $qb->createNamedParameter($fuelType)
-                    )
+                    ),
+                    $this->getFilterQuery()
                 )
             )
             ->orderBy('pr.price', 'ASC')
             ->setMaxResults(1);
+
         return (float) $qb->fetchOne();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilterQuery(): string
+    {
+        return count($this->getQueryFilters()) ?
+            implode(' AND ', array_map(
+                function (DatabaseQueryFilter $filter) {
+                    return $filter->getFilterQuery('pr.datetime');
+                },
+                $this->getQueryFilters()
+            )) :
+            '1';
     }
 }
