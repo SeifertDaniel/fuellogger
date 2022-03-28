@@ -2,45 +2,57 @@
 
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
+use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
+use Daniels\FuelLogger\Core\Registry;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
 class WebHook extends AbstractNotifier implements NotifierInterface
 {
-    public $url;
+    public string $url;
 
-    public function __construct($url)
+    /**
+     * @param string $url
+     */
+    public function __construct(string $url)
     {
         $this->url = $url;
     }
 
     /**
-     * @param $message
-     * @param $price
-     * @param $stations
+     * @param string $fuelType
+     * @param float $price
+     * @param string $stations
      *
      * @return bool
-     * @throws GuzzleException
+     * @throws filterPreventsNotificationException
      */
-    public function notify($fuelType, $price, $stations) : bool
+    public function notify(string $fuelType, float $price, string $stations) : bool
     {
-        if (false === $this->canNotify($fuelType, $price)) {
+        try {
+            $this->checkForPassedFilters($fuelType, $price);
+
+            $message = 'Preis ' . ucfirst($fuelType) . ': ' . $price . ' ' . $stations;
+            $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
+
+            $client = new Client();
+            $response = $client->request(
+                'POST',
+                $this->url,
+                $this->getSubmittedOptions($message)
+            );
+
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            Registry::getLogger()->error($e->getMessage());
             return false;
         }
-
-        $message = 'Preis '.ucfirst($fuelType).': ' . $price . ' ' . $stations;
-        $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
-
-        $client = new Client();
-        $response = $client->request(
-            'POST',
-            $this->url,
-            $this->getSubmittedOptions($message)
-        );
-
-        return $response->getStatusCode() === 200;
     }
 
+    /**
+     * @param $message
+     * @return array
+     */
     public function getSubmittedOptions($message): array
     {
         return [

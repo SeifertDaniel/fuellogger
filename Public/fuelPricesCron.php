@@ -10,6 +10,7 @@ use Daniels\FuelLogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
 use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\PetrolStation;
+use Doctrine\DBAL\Exception as DoctrineException;
 use Dotenv\Dotenv;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -32,6 +33,7 @@ class fuelPricesCron
     /**
      * @return void
      * @throws ApiException
+     * @throws DoctrineException
      * @throws GuzzleException
      */
     public function addCurrent()

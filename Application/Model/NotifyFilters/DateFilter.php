@@ -6,26 +6,26 @@ use DateTime;
 
 class DateFilter extends AbstractFilter
 {
-    public $from;
-    public $till;
+    public string $from;
+    public string $till;
 
     /**
-     * @param $from
-     * @param $till
+     * @param string $from
+     * @param string $till
      */
-    public function __construct($from, $till)
+    public function __construct(string $from, string $till)
     {
         $this->from = $from;
         $this->till = $till;
     }
 
     /**
-     * @param       $fuelType
+     * @param string $fuelType
      * @param float $price
      *
      * @return bool
      */
-    public function canNotifiy($fuelType, float $price) : bool
+    public function canNotifiy(string $fuelType, float $price) : bool
     {
         $f = DateTime::createFromFormat('!Y-m-d', $this->from);
         $t = DateTime::createFromFormat('!Y-m-d', $this->till);

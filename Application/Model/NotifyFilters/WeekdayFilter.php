@@ -25,12 +25,12 @@ class WeekdayFilter extends AbstractFilter
     }
 
     /**
-     * @param       $fuelType
+     * @param string $fuelType
      * @param float $price
      *
      * @return bool
      */
-    public function canNotifiy($fuelType, float $price) : bool
+    public function canNotifiy(string $fuelType, float $price) : bool
     {
         return in_array((new DateTime())->format('N'), $this->weekdays);
     }

@@ -6,7 +6,7 @@ abstract class AbstractFilter
 {
     protected bool $isInverted = false;
 
-    abstract public function canNotifiy($fuelType, float $price): bool;
+    abstract public function canNotifiy(string $fuelType, float $price): bool;
 
     public function invert()
     {

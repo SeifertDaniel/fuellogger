@@ -3,12 +3,16 @@
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
 use Daniels\FuelLogger\Application\Model\NotifyFilters\AbstractFilter;
-use Daniels\FuelLogger\Core\Registry;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
 
 abstract class AbstractNotifier implements NotifierInterface
 {
     protected array $filters = [];
 
+    /**
+     * @param AbstractFilter $filter
+     * @return $this
+     */
     public function addFilter(AbstractFilter $filter): self
     {
         $this->filters[] = $filter;
@@ -16,7 +20,10 @@ abstract class AbstractNotifier implements NotifierInterface
         return $this;
     }
 
-    public function getFilters()
+    /**
+     * @return array
+     */
+    public function getFilters(): array
     {
         return $this->filters;
     }
@@ -24,18 +31,14 @@ abstract class AbstractNotifier implements NotifierInterface
     /**
      * @param $fuelType
      * @param float $price
-     * @return bool
+     * @throws filterPreventsNotificationException
      */
-    public function canNotify($fuelType, float $price)
+    public function checkForPassedFilters($fuelType, float $price)
     {
-        return false === in_array(
-            false,
-            array_map(
-                function (AbstractFilter $filter) use ($fuelType, $price) {
-                    return $filter->isNotifiable($fuelType, $price);
-                },
-                $this->getFilters()
-            )
-        );
+        foreach ($this->getFilters() as $filter) {
+            if (false === $filter->isNotifiable($fuelType, $price)) {
+                throw new filterPreventsNotificationException();
+            }
+        }
     }
 }

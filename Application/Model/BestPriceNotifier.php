@@ -4,19 +4,29 @@ namespace Daniels\FuelLogger\Application\Model;
 
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierInterface;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierList;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
 use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Exception;
 
 class BestPriceNotifier
 {
     protected array $updatePrices = [];
 
-    public function __construct($updatePrices)
+    /**
+     * @param array $updatePrices
+     * @throws Exception
+     */
+    public function __construct(array $updatePrices)
     {
         $this->updatePrices = $updatePrices;
 
         $this->shouldNotify();
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function shouldNotify()
     {
         foreach (Fuel::getTypes() as $type) {
@@ -50,9 +60,13 @@ class BestPriceNotifier
         }
     }
 
-    protected function getLowestUpdatePrice($type = Fuel::TYPE_E10)
+    /**
+     * @param string $type
+     * @return mixed|null
+     */
+    protected function getLowestUpdatePrice(string $type = Fuel::TYPE_E10): mixed
     {
-        return is_array($this->updatePrices) && count($this->updatePrices) && is_array($this->updatePrices[$type]) && count($this->updatePrices[$type]) ?
+        return count($this->updatePrices) && is_array($this->updatePrices[$type]) && count($this->updatePrices[$type]) ?
             min(
                 array_filter(
                     $this->updatePrices[$type],
@@ -64,7 +78,13 @@ class BestPriceNotifier
             null;
     }
 
-    protected function notify($bestPrice, $type = Fuel::TYPE_E10)
+    /**
+     * @param $bestPrice
+     * @param string $type
+     * @return void
+     * @throws Exception
+     */
+    protected function notify($bestPrice, string $type = Fuel::TYPE_E10)
     {
         $stationList = $this->getCheapestStationList($type);
 
@@ -72,15 +92,22 @@ class BestPriceNotifier
         foreach((new NotifierList())->getList() as $notifier) {
             Registry::getLogger()->debug(__METHOD__.__LINE__);
             Registry::getLogger()->debug(get_class($notifier));
-            $notifier->notify(
-                $type,
-                $bestPrice,
-                $stationList
-            );
+            try {
+                $notifier->notify(
+                    $type,
+                    $bestPrice,
+                    $stationList
+                );
+            } catch (filterPreventsNotificationException) {}
         }
     }
 
-    protected function getCheapestStationList($type = Fuel::TYPE_E10)
+    /**
+     * @param string $type
+     * @return string
+     * @throws Exception
+     */
+    protected function getCheapestStationList(string $type = Fuel::TYPE_E10): string
     {
         $subQb = (new BestPrice())->getQueryBuilder($type);
 

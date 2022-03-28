@@ -22,13 +22,13 @@ use Doctrine\DBAL\Exception;
 class DailyBestPriceFilter extends AbstractFilter
 {
     /**
-     * @param       $fuelType
+     * @param string $fuelType
      * @param float $price
      *
      * @return bool
      * @throws Exception
      */
-    public function canNotifiy( $fuelType, float $price ): bool
+    public function canNotifiy( string $fuelType, float $price ): bool
     {
         return $price < $this->getBestPriceBeforeUpdate($fuelType);
     }

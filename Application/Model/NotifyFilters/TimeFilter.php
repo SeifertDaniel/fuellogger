@@ -6,8 +6,8 @@ use DateTime;
 
 class TimeFilter extends AbstractFilter
 {
-    public $from;
-    public $till;
+    public string $from;
+    public string $till;
 
     /**
      * @param $from
@@ -20,12 +20,12 @@ class TimeFilter extends AbstractFilter
     }
 
     /**
-     * @param       $fuelType
+     * @param string $fuelType
      * @param float $price
      *
      * @return bool
      */
-    public function canNotifiy($fuelType, float $price) : bool
+    public function canNotifiy(string $fuelType, float $price) : bool
     {
         $f = DateTime::createFromFormat('!H:i:s', $this->from);
         $t = DateTime::createFromFormat('!H:i:s', $this->till);
