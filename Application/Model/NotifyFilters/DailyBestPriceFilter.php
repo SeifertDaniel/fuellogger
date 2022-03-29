@@ -6,29 +6,8 @@ use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\Price;
 use Doctrine\DBAL\Exception;
 
-class DailyBestPriceFilter extends AbstractFilter
+class DailyBestPriceFilter extends AbstractQueryFilter
 {
-    protected array $filters = [];
-
-    /**
-     * @param DatabaseQueryFilter $filter
-     * @return $this
-     */
-    public function addQueryFilter(DatabaseQueryFilter $filter): self
-    {
-        $this->filters[] = $filter;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getQueryFilters(): array
-    {
-        return $this->filters;
-    }
-
     /**
      * @param string $fuelType
      * @param float $price
