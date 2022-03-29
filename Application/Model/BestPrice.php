@@ -47,7 +47,8 @@ class BestPrice
                     )
                 )
             )
-            ->orderBy('pr.price', 'ASC');
+            ->orderBy('pr.price', 'ASC')
+            ->addOrderBy('timediff', 'DESC');
 
         return $qb;
     }
