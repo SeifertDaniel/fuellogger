@@ -53,14 +53,13 @@ class stationPriceList implements controllerInterface
         $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
         $conn = DBConnection::getConnection();
 
-        $priceStats = [];
+        $lists = [];
         foreach (Fuel::getTypes() as $type) {
             $pricestat = new PriceStatistics();
             $qb = $pricestat->getLowPriceStatsByStation($stationId, $type);
-            $priceStats[$type] = $qb->fetchAllAssociative();
+            $lists[$type]['stat'] = $qb->fetchAllAssociative();
         }
 
-        $priceList = [];
         foreach (Fuel::getTypes() as $type) {
             $qb = $conn->createQueryBuilder();
 
@@ -88,13 +87,12 @@ class stationPriceList implements controllerInterface
                 )
                 ->groupBy('t1.stationid', 't1.datetime')
                 ->orderBy('ts1', 'DESC');
-            $priceList[$type] = $qb->fetchAllAssociative();
+            $lists[$type]['prices'] = $qb->fetchAllAssociative();
         }
 
         Registry::getTwig()->addGlobal('stationName', $stationName);
         Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
-        Registry::getTwig()->addGlobal('priceStats', $priceStats);
-        Registry::getTwig()->addGlobal('priceList', $priceList);
+        Registry::getTwig()->addGlobal('lists', $lists);
 
         return 'pages/stationPriceList.html.twig';
     }
@@ -151,7 +149,7 @@ class stationPriceList implements controllerInterface
                 $graph->data[ $fuelType ] = $data;
             }
 
-            $graph->renderToOutput( 1000, 400 );
+            $graph->renderToOutput( 1200, 600 );
         } catch ( Exception $e) {
             print_r($e->getMessage());
         }
