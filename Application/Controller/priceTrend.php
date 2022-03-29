@@ -85,7 +85,7 @@ class priceTrend implements controllerInterface
             $nAxis->label                             = 'Oelpreis';
             $graph->data[ ucfirst( 'brent' ) ]->yAxis = $nAxis;
 
-            $graph->renderToOutput( 1000, 400 );
+            $graph->renderToOutput( 1200, 600 );
         } catch ( Exception $e) {
             Registry::getLogger()->error($e->getMessage());
         }
