@@ -22,6 +22,12 @@ class FuelTypeFilter extends AbstractFilter
      */
     public function canNotifiy(string $fuelType, float $price) : bool
     {
-        return in_array($fuelType, $this->fuelTypes);
+        $canNotify = in_array($fuelType, $this->fuelTypes);
+
+        if (false === $canNotify) {
+            $this->setDebugMessage("fuelTypes ".implode(', ', $this->fuelTypes)." do not match $fuelType");
+        }
+
+        return $canNotify;
     }
 }

@@ -25,6 +25,12 @@ class PriceFilter extends AbstractFilter
      */
     public function canNotifiy(string $fuelType, float $price): bool
     {
-        return $this->from <= $price && $price <= $this->till;
+        $canNotify = $this->from <= $price && $price <= $this->till;
+
+        if (false === $canNotify) {
+            $this->setDebugMessage("price $price is not between $this->from and $this->till");
+        }
+
+        return $canNotify;
     }
 }

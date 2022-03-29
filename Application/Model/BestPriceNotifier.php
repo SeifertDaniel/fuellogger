@@ -98,7 +98,9 @@ class BestPriceNotifier
                     $bestPrice,
                     $stationList
                 );
-            } catch (filterPreventsNotificationException) {}
+            } catch (filterPreventsNotificationException $e) {
+                Registry::getLogger()->debug($e->getMessage());
+            }
         }
     }
 

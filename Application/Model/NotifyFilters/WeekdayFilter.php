@@ -32,6 +32,13 @@ class WeekdayFilter extends AbstractFilter
      */
     public function canNotifiy(string $fuelType, float $price) : bool
     {
-        return in_array((new DateTime())->format('N'), $this->weekdays);
+        $currentWeekDay = (new DateTime())->format('N');
+        $canNotify = in_array($currentWeekDay, $this->weekdays);
+
+        if (false === $canNotify) {
+            $this->setDebugMessage("Weekdays ".implode(', ', $this->weekdays)." do not match $currentWeekDay");
+        }
+
+        return $canNotify;
     }
 }

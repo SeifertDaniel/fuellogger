@@ -31,6 +31,15 @@ class DateFilter extends AbstractFilter
         $t = DateTime::createFromFormat('!Y-m-d', $this->till);
         $i = (new DateTime())->setDate($f->format('Y'),$f->format('m'), $f->format('d'));
 
-        return $f <= $i && $i <= $t;
+        $canNotify = $f <= $i && $i <= $t;
+
+        if (false === $canNotify) {
+            $this->setDebugMessage(
+                "Date ".$i->format('Y-m-d')." is not between ".
+                $f->format('Y-m-d')." and ".$t->format('Y-m-d')
+            );
+        }
+
+        return $canNotify;
     }
 }

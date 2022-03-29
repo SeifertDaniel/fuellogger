@@ -33,7 +33,16 @@ class TimeFilter extends AbstractFilter implements DatabaseQueryFilter
         $t = DateTime::createFromFormat('!H:i:s', $this->till);
         $i = (new DateTime())->setDate($f->format('Y'),$f->format('m'), $f->format('d'));
         if ($f > $t) $t->modify('+1 day');
-        return ($f <= $i && $i <= $t) || ($f <= $i->modify('+1 day') && $i <= $t);
+        $canNotify = ($f <= $i && $i <= $t) || ($f <= $i->modify('+1 day') && $i <= $t);
+
+        if (false === $canNotify) {
+            $this->setDebugMessage(
+                "Time ".$i->format('H:i:s')." is not between ".
+                $f->format('H:i:s')." and ".$t->format('H:i:s')
+            );
+        }
+
+        return $canNotify;
     }
 
     /**

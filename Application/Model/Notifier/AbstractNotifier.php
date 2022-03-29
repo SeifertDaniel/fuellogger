@@ -37,7 +37,7 @@ abstract class AbstractNotifier implements NotifierInterface
     {
         foreach ($this->getFilters() as $filter) {
             if (false === $filter->isNotifiable($fuelType, $price)) {
-                throw new filterPreventsNotificationException();
+                throw new filterPreventsNotificationException($filter);
             }
         }
     }

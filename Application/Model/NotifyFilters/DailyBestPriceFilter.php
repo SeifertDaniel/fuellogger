@@ -17,7 +17,14 @@ class DailyBestPriceFilter extends AbstractQueryFilter
      */
     public function canNotifiy( string $fuelType, float $price ): bool
     {
-        return $price < $this->getBestPriceBeforeUpdate($fuelType);
+        $bestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate($fuelType);
+        $canNotify = $price < $bestPriceBeforeUpdate;
+
+        if (false === $canNotify) {
+            $this->setDebugMessage("price $price is not lower than $bestPriceBeforeUpdate");
+        }
+
+        return $canNotify;
     }
 
     /**
