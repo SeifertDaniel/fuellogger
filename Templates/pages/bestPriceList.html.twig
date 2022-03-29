@@ -3,29 +3,41 @@
 {% block title %}Preis&uuml;bersicht{% endblock %}
 
 {% block content %}
-    <h1>Preis&uuml;bersicht</h1>
+    <div class="container">
+        <h2>Preis&uuml;bersicht</h2>
 
-    {% for fuelType,priceList in fuelPrices %}
-        <h2>{{ fuelType|capitalize }}</h2>
+        <div class="row">
+            {% for fuelType,priceList in fuelPrices %}
+                <div class="col-sm">
+                    <h3>{{ fuelType|capitalize }}</h3>
 
-        <table style='border: 1px solid silver'>
-            <tr>
-                <th>Tankstelle</th>
-                <th>Ort</th>
-                <th>aktueller Preis</th>
-                <th>&Auml;nderung vor (Std:Min)</th>
-                <th>Historie</th>
-            </tr>
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th>Tankstelle</th>
+                            <th>Preis</th>
+                            <th>Details</th>
+                        </tr>
 
-            {% for priceItem in priceList %}
-                <tr>
-                    <td>{{ priceItem.name }}</td>
-                    <td>{{ priceItem.place }}</td>
-                    <td>{{ priceItem.price }}</td>
-                    <td>{{ priceItem.timediff }}</td>
-                    <td><a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>Entwicklung</a></td>
-                </tr>
+                        {% for priceItem in priceList %}
+                            <tr>
+                                <td>
+                                    {{ priceItem.name }}<br>
+                                    <small>{{ priceItem.place }}</small>
+                                </td>
+                                <td>
+                                    {{ priceItem.price }}<br>
+                                    <small class="text-nowrap">seit {{ priceItem.timediff }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
             {% endfor %}
-        </table>
-    {% endfor %}
+        </div>
+    </div>
 {% endblock %}
