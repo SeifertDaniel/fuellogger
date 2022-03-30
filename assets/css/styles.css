@@ -1,0 +1,71 @@
+html {
+    background: url(../images/fuel.jpg) repeat-x center bottom fixed;
+    -webkit-background-size: auto;
+    -moz-background-size: auto;
+    -o-background-size: auto;
+    background-size: auto;
+}
+
+body {
+    background-color: transparent;
+}
+
+.navbar-dark h1 a.navbar-brand {
+    color: #ecc838;
+}
+
+h1, h2, h3 {
+    font-family: 'Oswald', sans-serif;
+}
+
+nav.navbar {
+    margin-bottom: 50px;
+}
+
+img, h2 {
+    margin-bottom: 30px;
+}
+
+nav > div.container-fluid {
+    padding-bottom: 10px;
+}
+
+#navbarNavDropdown {
+    margin-top: 13px;
+}
+
+table,
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+table {
+    border-radius: 5px;
+}
+
+.neon {
+    /* color: #fff;*/
+    text-shadow:
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 20px #fff,
+            0 0 40px #ffdf00,
+            0 0 80px #ffdf00,
+            0 0 90px #ffdf00,
+            0 0 100px #ffdf00,
+            0 0 150px #ffdf00;
+}
+
+a {
+    color: darkgoldenrod;
+}
+
+a:hover {
+    color: goldenrod;
+}
+
+.table-striped > tbody > tr.closed > *,
+.table-striped > tbody > tr.closed:nth-of-type(2n+1) > * {
+    color: darkgray;
+}
