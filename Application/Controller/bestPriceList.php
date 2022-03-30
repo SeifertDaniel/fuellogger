@@ -10,10 +10,9 @@ class bestPriceList implements controllerInterface
 {
     public function init()
     {
-
     }
 
-    public function render()
+    public function render(): string
     {
         $fuelPrices = [];
         foreach (Fuel::getTypes() as $type) {

@@ -19,10 +19,11 @@
                         </tr>
 
                         {% for priceItem in priceList %}
-                            <tr>
+                            <tr class="{% if priceItem.closed %}closed {% endif %}">
                                 <td>
                                     {{ priceItem.name }}<br>
                                     <small>{{ priceItem.place }}</small>
+                                    {% if priceItem.closed %}(geschlossen){% endif %}
                                 </td>
                                 <td>
                                     {{ priceItem.price }}<br>
