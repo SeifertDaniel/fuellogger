@@ -58,8 +58,21 @@ class BestPrice
                 )
             )
             ->groupBy('st.id')
-            ->orderBy('pr.price', 'ASC')
-            ->addOrderBy('timediff', 'DESC');
+            ->orderBy('pr.price', 'ASC');
+
+        return $qb;
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return QueryBuilder
+     * @throws Exception
+     */
+    public function getTimeDiffSortedQueryBuilder(string $type = Fuel::TYPE_E10): QueryBuilder
+    {
+        $qb = $this->getQueryBuilder($type);
+        $qb->addOrderBy('timediff', 'DESC');
 
         return $qb;
     }

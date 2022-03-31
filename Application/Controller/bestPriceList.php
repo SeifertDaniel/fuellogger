@@ -5,6 +5,7 @@ namespace Daniels\FuelLogger\Application\Controller;
 use Daniels\FuelLogger\Application\Model\BestPrice;
 use Daniels\FuelLogger\Application\Model\Fuel;
 use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Exception;
 
 class bestPriceList implements controllerInterface
 {
@@ -12,11 +13,15 @@ class bestPriceList implements controllerInterface
     {
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function render(): string
     {
         $fuelPrices = [];
         foreach (Fuel::getTypes() as $type) {
-            $qb = (new BestPrice())->getQueryBuilder($type);
+            $qb = (new BestPrice())->getTimeDiffSortedQueryBuilder($type);
             $fuelPrices[$type] = $qb->fetchAllAssociative();
         }
 
