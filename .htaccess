@@ -1,0 +1,24 @@
+# disabling log file access from outside
+<FilesMatch "(EXCEPTION_LOG\.txt|\.log|\.twig|\.ini|\.pem|composer\.json|composer\.lock)$">
+   <IfModule mod_authz_core.c>
+       Require all denied
+   </IfModule>
+   <IfModule !mod_authz_core.c>
+       Order allow,deny
+       Deny from all
+   </IfModule>
+</FilesMatch>
+
+# Prevent .ht* files from being sent to outside requests
+<Files ~ "^\.ht">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Files>
+
+Options -Indexes
+DirectoryIndex index.php index.html
