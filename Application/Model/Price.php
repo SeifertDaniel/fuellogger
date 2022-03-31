@@ -2,16 +2,27 @@
 
 namespace Daniels\FuelLogger\Application\Model;
 
+use Doctrine\DBAL\Exception;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 class Price
 {
-    public function getCoreTableName()
+    /**
+     * @return string
+     */
+    public function getCoreTableName(): string
     {
         return 'prices';
     }
 
-    public function getLastPrice($stationId, $type)
+    /**
+     * @param $stationId
+     * @param $type
+     * @return float
+     * @throws Exception
+     */
+    public function getLastPrice($stationId, $type) :float
     {
         $conn = DBConnection::getConnection();
         $qb = $conn->createQueryBuilder();
@@ -31,14 +42,22 @@ class Price
             )->orderBy('timestamp', 'DESC')
             ->setMaxResults(1);
 
-        return $qb->fetchOne();
+        return (float) $qb->fetchOne();
     }
 
+    /**
+     * @param string $stationid
+     * @param string $type
+     * @param $price
+     * @return UuidInterface
+     * @throws Exception
+     */
     public function insert(
-        $stationid,
-        $type,
+        string $stationid,
+        string $type,
         $price
-    ) {
+    ): UuidInterface
+    {
         $uuid = Uuid::uuid4();
 
         $conn = DBConnection::getConnection();
