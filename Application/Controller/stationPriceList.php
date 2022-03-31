@@ -33,68 +33,29 @@ class stationPriceList implements controllerInterface
     /**
      * @throws DoctrineException
      */
-    public function render()
+    public function render(): string
     {
         $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
         $conn = DBConnection::getConnection();
 
-        $station = new Station();
-        $stationTable = $station->getCoreTableName();
-
-        $qbs = $conn->createQueryBuilder();
-        $qbs->select('CONCAT(name, " (", place, ")")')
-            ->from($stationTable)
-            ->where($qbs->expr()->eq(
-                'id',
-                $qbs->createNamedParameter($stationId)
-            ));
-        $stationName = $qbs->fetchOne();
-
-        $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
-        $conn = DBConnection::getConnection();
-
-        $lists = [];
-        foreach (Fuel::getTypes() as $type) {
-            $pricestat = new PriceStatistics();
-            $qb = $pricestat->getLowPriceStatsByStation($stationId, $type);
-            $lists[$type]['stat'] = $qb->fetchAllAssociative();
-        }
-
-        foreach (Fuel::getTypes() as $type) {
-            $qb = $conn->createQueryBuilder();
-
-            $prices = new Price();
-            $priceTable = $prices->getCoreTableName();
-
-            $qb->select("DATE_FORMAT(t1.datetime, '%d.%m. %H:%i') ts1", "DATE_FORMAT(IF(min(t2.datetime) IS NULL, NOW(), min(t2.datetime)), '%d.%m %H:%i') ts2", "t1.price")
-                ->from($priceTable, 't1')
-                ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime and t1.type = t2.type')
-                ->where(
-                    $qb->expr()->and(
-                        $qb->expr()->eq(
-                            't1.stationid',
-                            $qb->createNamedParameter($stationId)
-                        ),
-                        $qb->expr()->eq(
-                            't1.type',
-                            $qb->createNamedParameter($type)
-                        ),
-                        $qb->expr()->gt(
-                            't1.datetime',
-                            'date_sub(NOW(), interval 1 day)'
-                        )
-                    )
-                )
-                ->groupBy('t1.stationid', 't1.datetime')
-                ->orderBy('ts1', 'DESC');
-            $lists[$type]['prices'] = $qb->fetchAllAssociative();
-        }
-
-        Registry::getTwig()->addGlobal('stationName', $stationName);
+        Registry::getTwig()->addGlobal('openingTimes', $this->getOpeningTimes($stationId));
+        Registry::getTwig()->addGlobal('station', $this->getStation($conn, $stationId));
+        Registry::getTwig()->addGlobal('currPrices', $this->getCurrentPrices($stationId, $conn));
         Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
-        Registry::getTwig()->addGlobal('lists', $lists);
+        Registry::getTwig()->addGlobal('lists', $this->getPriceStatsLists($stationId, $conn));
 
         return 'pages/stationPriceList.html.twig';
+    }
+
+    /**
+     * @param $stationId
+     * @return array
+     * @throws DoctrineException
+     */
+    public function getOpeningTimes($stationId): array
+    {
+        $ot = new openingTimes($stationId);
+        return $ot->getOpeningTimesList();
     }
 
     public function getGraph()
@@ -202,5 +163,124 @@ class stationPriceList implements controllerInterface
         }
 
         return $source;
+    }
+
+    /**
+     * @param string $stationId
+     * @param Connection $conn
+     * @return array
+     * @throws DoctrineException
+     */
+    protected function getPriceStatsLists(string $stationId, Connection $conn): array
+    {
+        $lists = [];
+        foreach (Fuel::getTypes() as $type) {
+            $pricestat = new PriceStatistics();
+            $qb = $pricestat->getLowPriceStatsByStation($stationId, $type);
+            $lists[$type]['stat'] = $qb->fetchAllAssociative();
+        }
+
+        foreach (Fuel::getTypes() as $type) {
+            $qb = $conn->createQueryBuilder();
+
+            $prices = new Price();
+            $priceTable = $prices->getCoreTableName();
+
+            $qb->select("DATE_FORMAT(t1.datetime, '%d.%m. %H:%i') ts1", "DATE_FORMAT(IF(min(t2.datetime) IS NULL, NOW(), min(t2.datetime)), '%d.%m %H:%i') ts2", "t1.price")
+                ->from($priceTable, 't1')
+                ->leftJoin('t1', $priceTable, 't2', 't1.stationid = t2.stationid and t1.datetime < t2.datetime and t1.type = t2.type')
+                ->where(
+                    $qb->expr()->and(
+                        $qb->expr()->eq(
+                            't1.stationid',
+                            $qb->createNamedParameter($stationId)
+                        ),
+                        $qb->expr()->eq(
+                            't1.type',
+                            $qb->createNamedParameter($type)
+                        ),
+                        $qb->expr()->gt(
+                            't1.datetime',
+                            'date_sub(NOW(), interval 1 day)'
+                        )
+                    )
+                )
+                ->groupBy('t1.stationid', 't1.datetime')
+                ->orderBy('ts1', 'DESC');
+            $lists[$type]['prices'] = $qb->fetchAllAssociative();
+        }
+        return $lists;
+    }
+
+    /**
+     * @param Connection $conn
+     * @param string $stationId
+     * @return array
+     * @throws DoctrineException
+     */
+    protected function getStation(Connection $conn, string $stationId): array
+    {
+        $station = new Station();
+        $stationTable = $station->getCoreTableName();
+
+        $qbs = $conn->createQueryBuilder();
+        $qbs->select('*', 'CONCAT(name, " (", place, ")") as stationname')
+            ->from($stationTable)
+            ->where($qbs->expr()->eq(
+                'id',
+                $qbs->createNamedParameter($stationId)
+            ))
+            ->setMaxResults(1);
+        return array_change_key_case($qbs->fetchAssociative(), CASE_LOWER);
+    }
+
+    /**
+     * @param string $stationId
+     * @param Connection $conn
+     * @return array
+     * @throws DoctrineException
+     */
+    public function getCurrentPrices(string $stationId, Connection $conn): array
+    {
+        ini_set('display_errors', 1);
+        $price = new Price();
+        $priceTable = $price->getCoreTableName();
+
+        $qbs = $conn->createQueryBuilder();
+        $qbs->select('pr.type', 'MAX(pr.datetime) as datetime')
+            ->from($priceTable, 'pr')
+            ->where(
+                $qbs->expr()->eq(
+                    'pr.stationid',
+                    $conn->quote($stationId)
+                )
+            )
+            ->groupBy('pr.type');
+
+        $qb = $conn->createQueryBuilder();
+        $qb->select('p2.id', 'p2.type', 'p2.price')
+            ->from($priceTable, 'p2')
+            ->innerJoin(
+                'p2',
+                "(".$qbs->getSQL().")",
+                'p1',
+                $qb->expr()->and(
+                    $qb->expr()->eq(
+                        'p2.stationid',
+                        $qb->createNamedParameter($stationId)
+                    ),
+                    $qb->expr()->eq(
+                        'p1.type',
+                        'p2.type'
+                    ),
+                    $qb->expr()->eq(
+                        'p1.datetime',
+                        'p2.datetime'
+                    )
+                )
+            )
+            ->orderBy('FIELD(p2.type,"'.implode('","',Fuel::getTypes()).'")');
+
+        return array_change_key_case($qb->fetchAllAssociativeIndexed(), CASE_LOWER);
     }
 }

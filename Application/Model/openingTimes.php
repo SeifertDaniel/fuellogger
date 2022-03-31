@@ -3,7 +3,9 @@
 namespace Daniels\FuelLogger\Application\Model;
 
 use DateTime;
+use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\DBAL\ParameterType;
+use Exception;
 
 class openingTimes
 {
@@ -15,21 +17,47 @@ class openingTimes
     const WDAY_SAT = 6;  // 32
     const WDAY_SUN = 7;  // 64
 
-    protected $stationId;
+    protected string $stationId;
 
-    protected $openingTimes = [];
+    protected array $openingTimes = [];
 
     public function __construct($stationId)
     {
         $this->stationId = $stationId;
     }
 
-    public function getCoreTableName()
+    /**
+     * @return string
+     */
+    public function getCoreTableName(): string
     {
         return 'openingtimes';
     }
 
-    public function isOpen($weekday, $checkDate)
+    /**
+     * @return int[]
+     */
+    public function getWeekdayList(): array
+    {
+        return [
+            self::WDAY_MON  => 'Montag',
+            self::WDAY_TUE  => 'Dienstag',
+            self::WDAY_WED  => 'Mittwoch',
+            self::WDAY_THU  => 'Donnerstag',
+            self::WDAY_FRI  => 'Freitag',
+            self::WDAY_SAT  => 'Samstag',
+            self::WDAY_SUN  => 'Sonntag'
+        ];
+    }
+
+    /**
+     * @param $weekday
+     * @param $checkDate
+     *
+     * @return bool
+     * @throws DoctrineException
+     */
+    public function isOpen($weekday, $checkDate): bool
     {
         $weekdayInt = 1 << ((int) $weekday) -1;
 
@@ -49,16 +77,28 @@ class openingTimes
         return (bool) $qb->fetchOne();
     }
 
-    public function isClosed($weekday, $checkdate)
+    /**
+     * @param $weekday
+     * @param $checkdate
+     *
+     * @return bool
+     * @throws DoctrineException
+     */
+    public function isClosed($weekday, $checkdate): bool
     {
         return false === $this->isOpen($weekday, $checkdate);
     }
 
-    public function getOpeningTimes($weekday = null)
+    /**
+     * @param int $weekday
+     *
+     * @return array
+     * @throws DoctrineException
+     */
+    public function getOpeningTimes(int $weekday): array
     {
-        $weekdayInt = 1 << ((int) $weekday) -1;
+        $weekdayInt = 1 << $weekday - 1;
 
-        ini_set('display_errors', 1);
         $qb = DBConnection::getConnection()->createQueryBuilder();
 
         $qb->select('ot.from', 'ot.to')
@@ -69,14 +109,59 @@ class openingTimes
                         'ot.stationid',
                         $qb->createNamedParameter($this->stationId)
                     ),
-                    $weekday === null ? 1 : 'ot.weekday & '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER).' = '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER)
+                    'ot.weekday & '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER).' = '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER)
                 )
             );
 
         return $qb->fetchAllAssociative();
     }
 
-    public function isOpenCached($checktime, $weekday = null)
+    /**
+     * @param int $weekday
+     *
+     * @return array
+     * @throws DoctrineException
+     */
+    public function getOpeningTimesList(): array
+    {
+        $qb = DBConnection::getConnection()->createQueryBuilder();
+
+        $qb->select('ot.*')
+            ->from($this->getCoreTableName(), 'ot')
+            ->where(
+                $qb->expr()->and(
+                    $qb->expr()->eq(
+                        'ot.stationid',
+                        $qb->createNamedParameter($this->stationId)
+                    )
+                )
+            );
+
+        $times = array_fill_keys($this->getWeekdayList(), []);
+        foreach ($qb->fetchAllAssociative() as $item) {
+            $item = array_change_key_case($item, CASE_LOWER);
+            foreach ($this->getWeekdayList() as $wd => $wdName) {
+                $wdInt = (1 << $wd - 1);
+                if (($item['weekday'] & $wdInt) == $wdInt) {
+                    $times[$wdName][DateTime::createFromFormat('H:i:s', $item['from'])->format('U')] = [
+                        'from' => DateTime::createFromFormat('H:i:s', $item['from'])->format('H:i'),
+                        'to'   => DateTime::createFromFormat('H:i:s', $item['to'])->format('H:i')
+                    ];
+                }
+            }
+        }
+
+        return $times;
+    }
+
+    /**
+     * @param      $checktime
+     * @param null $weekday
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function isOpenCached($checktime, $weekday = null): bool
     {
         $checktime = (new DateTime($checktime))->format('H:i:s');
 
@@ -95,12 +180,25 @@ class openingTimes
         return false;
     }
 
-    public function isClosedCached($checkTime, $weekday = null)
+    /**
+     * @param      $checkTime
+     * @param null $weekday
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function isClosedCached($checkTime, $weekday = null): bool
     {
         return false === $this->isOpenCached($checkTime, $weekday);
     }
 
-    public function getWeekdayByDate($date)
+    /**
+     * @param $date
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function getWeekdayByDate($date): string
     {
         return (new DateTime($date))->format('N');
     }

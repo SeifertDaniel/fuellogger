@@ -1,10 +1,74 @@
 {% extends "base.html.twig" %}
 
-{% block title %}{{ stationName }}{% endblock %}
+{% block title %}{{ station['stationname'] }}{% endblock %}
 
 {% block content %}
     <div class="container">
-        <h2>{{ stationName }}</h2>
+        <h2>{{ station['stationname'] }}</h2>
+
+        <div class="row">
+            <div class="col-sm">
+                <h3>&Ouml;ffnungszeiten</h3>
+                <table class="table table-bordered table-striped">
+                    {% for day,dayTimes in openingTimes %}
+                        <tr>
+                            <td>
+                                {{ day }}
+                            </td>
+                            <td>
+                                {% for time in dayTimes %}
+                                    {{ time['from'] }} - {{ time['to'] }}<br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div class="col-sm">
+                <h3>Adresse</h3>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <td>
+                            {{ station['name'] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ station['street'] }} {{ station['housenumber'] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ "%05d"|format(station['postcode']) }} {{ station['place'] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ station['lat']|url_encode }},{{ station['lon']|url_encode }}">
+                                <i class="fa-solid fa-map-location-dot"></i> auf Google Maps
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-sm">
+                <h3>aktuelle Preise</h3>
+                <table class="table table-bordered table-striped">
+                    {% for typeprices in currPrices %}
+                        <tr>
+                            <td>
+                                {{ typeprices['type']|capitalize }}
+                            </td>
+                            <td>
+                                {{ typeprices['price'] }} &euro;
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
 
         <img src="{{ requestUrl|replace({"&amp;": "&"}) }}&amp;fnc=getGraph" style="width: 100%">
 
