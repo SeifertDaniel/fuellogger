@@ -23,6 +23,7 @@ class DBConnection
                 'password' => $_ENV['DBPASS'],
                 'host' => $_ENV['DBHOST'],
                 'driver' => $_ENV['DBDRIVER'],
+                'charset'   => 'utf8mb4'
             ];
             static::$instance = DriverManager::getConnection($connectionParams);
         }
