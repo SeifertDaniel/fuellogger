@@ -43,7 +43,7 @@ class BestPriceNotifier
                    ),
                    $qb->expr()->lt(
                        'pr.datetime',
-                       'NOW() - INTERVAL 1 MINUTE'
+                       'NOW() - INTERVAL 2 MINUTE'
                    )
                )
                ->setMaxResults(1);

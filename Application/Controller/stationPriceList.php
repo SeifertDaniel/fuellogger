@@ -206,7 +206,7 @@ class stationPriceList implements controllerInterface
                     )
                 )
                 ->groupBy('t1.stationid', 't1.datetime')
-                ->orderBy('ts1', 'DESC');
+                ->orderBy('t1.datetime', 'DESC');
             $lists[$type]['prices'] = $qb->fetchAllAssociative();
         }
         return $lists;
