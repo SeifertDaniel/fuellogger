@@ -3,24 +3,30 @@
 namespace Daniels\FuelLogger\PublicDir;
 
 use Daniels\FuelLogger\Application\Model\OilPrice;
+use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
 use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApi;
 use DateTime;
-use Dotenv\Dotenv;
+use Exception;
 
-require_once __DIR__.'/../../vendor/autoload.php';
+require_once dirname(__FILE__) . "/../bootstrap.php";
 
-class oilPricesCron
+class oilPricesCron extends Base
 {
     protected CommoditiesApi $api;
 
+    /**
+     * @throws Exception
+     */
     public function __construct()
     {
-        $dotenv = Dotenv::createImmutable(__DIR__."/../..");
-        $dotenv->load();
-        $dotenv->required(['DBHOST', 'DBNAME', 'DBUSER', 'DBPASS', 'DBDRIVER', 'TKAPIKEY', 'LOCATIONLAT', 'LOCATIONLNG', 'COMMODITIESAPIKEY'])->notEmpty();
+        parent::__construct();
 
         $this->api = new CommoditiesApi($_ENV['COMMODITIESAPIKEY']);
+
+        $this->addCurrent();
+
+        $this->finalize();
     }
 
     public function addCurrent()
@@ -28,19 +34,23 @@ class oilPricesCron
         $oilPrice = new OilPrice();
         $checkDate = (new DateTime())->format('Y-m-d');
 
-        if ($oilPrice->existForDate($checkDate)) {
-            throw new \Exception('oil price exists already for '.$checkDate);
+        try {
+            if ($oilPrice->existForDate($checkDate)) {
+                throw new Exception('oil price exists already for ' . $checkDate);
+            }
+
+            $rates = $this->api->request([CommoditiesApi::SYMBOL_BRENTOIL]);
+
+            $oilPrice->insert(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
+        } catch (Exception $e) {
+            Registry::getLogger()->error($e->getMessage());
         }
 
-        $rates = $this->api->request([CommoditiesApi::SYMBOL_BRENTOIL]);
-
-        $oilPrice->insert(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
     }
 }
 
 try {
-    $runner = new oilPricesCron();
-    $runner->addCurrent();
-} catch (\Exception $e) {
+    new oilPricesCron();
+} catch (Exception $e) {
     Registry::getLogger()->error($e->getMessage());
 }

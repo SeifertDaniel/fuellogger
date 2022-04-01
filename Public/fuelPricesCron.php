@@ -6,28 +6,35 @@ use Daniels\FuelLogger\Application\Model\BestPriceNotifier;
 use Daniels\FuelLogger\Application\Model\Fuel;
 use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Application\Model\Station;
+use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
 use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\PetrolStation;
 use Doctrine\DBAL\Exception as DoctrineException;
-use Dotenv\Dotenv;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 
-require_once __DIR__.'/../../vendor/autoload.php';
+require_once dirname(__FILE__) . "/../bootstrap.php";
 
-class fuelPricesCron
+class fuelPricesCron extends Base
 {
     protected ApiClient $api;
 
+    /**
+     * @throws ApiException
+     * @throws DoctrineException
+     * @throws GuzzleException
+     */
     public function __construct()
     {
-        $dotenv = Dotenv::createImmutable(__DIR__."/../..");
-        $dotenv->load();
-        $dotenv->required(['DBHOST', 'DBNAME', 'DBUSER', 'DBPASS', 'DBDRIVER', 'TKAPIKEY', 'LOCATIONLAT', 'LOCATIONLNG'])->notEmpty();
+        parent::__construct();
 
         $this->api = new ApiClient($_ENV['TKAPIKEY']);
+
+        $this->addCurrent();
+
+        $this->finalize();
     }
 
     /**
@@ -114,8 +121,7 @@ class fuelPricesCron
 }
 
 try {
-    $runner = new fuelPricesCron();
-    $runner->addCurrent();
-} catch (Exception|GuzzleException $e) {
+    new fuelPricesCron();
+} catch (Exception $e) {
     Registry::getLogger()->error($e->getMessage());
 }

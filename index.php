@@ -4,19 +4,18 @@ namespace Daniels\FuelLogger;
 
 use Daniels\FuelLogger\Application\Controller\controllerInterface;
 use Daniels\FuelLogger\Application\Model\ControllerMapper;
+use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
-use Dotenv\Dotenv;
 
-require_once '../vendor/autoload.php';
+require_once dirname(__FILE__) . "/bootstrap.php";
 
-class index
+class index extends Base
 {
     public function __construct()
     {
+        parent::__construct();
+
         $callRender = true;
-        $dotenv = Dotenv::createImmutable(__DIR__."/..");
-        $dotenv->load();
-        $dotenv->required(['DBHOST', 'DBNAME', 'DBUSER', 'DBPASS', 'DBDRIVER'])->notEmpty();
 
         $cl = Registry::getRequest()->getRequestEscapedParameter('cl') ?: 'bestPriceList';
         $fnc = Registry::getRequest()->getRequestEscapedParameter('fnc') ?: false;
@@ -35,6 +34,8 @@ class index
             $template = Registry::getTwig()->load($tpl);
             echo $template->render();
         }
+
+        $this->finalize();
     }
 }
 
