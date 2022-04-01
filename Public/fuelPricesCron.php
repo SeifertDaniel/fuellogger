@@ -39,6 +39,9 @@ class fuelPricesCron
     public function addCurrent()
     {
         $updatePrices = [];
+        foreach (Fuel::getTypes() as $type) {
+            $updatePrices[$type] = [];
+        };
 
         foreach ($this->getStations() as $stationTkId => $stationData) {
             $station = new Station();
@@ -64,7 +67,6 @@ class fuelPricesCron
             $price = new Price();
 
             foreach (Fuel::getTypes() as $type) {
-                $updatePrices[$type] = [];
                 if ($price->getLastPrice($stationId, $type) != $stationData[$type]) {
                     $price->insert(
                         $stationId,
