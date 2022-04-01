@@ -1,0 +1,35 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Impressum / Haftungsausschluss{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Impressum</h2>
+        <p>Dies ist eine privat betriebene Seite ohne Erzielung von Einnahmen aus deren Betrieb oder Verbindung zu den auf der Seite genannten Anbietern. Daher entfällt die Impressumspflicht.</p>
+        <p>Für Anfragen senden Sie bitte eine Email an
+            <script type="application/javascript">
+                user = 'benzin';
+                site = 'aus-stollberg.de';
+                document.write('<a href=\"mailto:' + user + '@' + site + '\">');
+                document.write(user + '@' + site + '</a>');
+            </script>.
+        </p>
+    </div>
+    <div class="container">
+        <h2>Datenschutz</h2>
+        <p>Beim Aufruf dieser Seite wird Ihre IP-Adresse in anonymisierter Form zu Zwecken einer möglichen Fehleranalyse abgelegt. Diese Aufzeichnungen werden nach spätestens 90 Tagen gelöscht.</p>
+        <p>Diese Seite verwendet keine Cookies.</p>
+    </div>
+    <div class="container">
+        <h2>Haftungsausschluss</h2>
+        <p>Alle Angaben auf dieser Seite erheben keinen Anspruch auf Vollständigkeit oder Aktualität und haben nur informatorischen Charakter.</p>
+        <p>Für die Verkaufspreise der Kraftstoffe gelten ausschließlich die Angaben an den Zapfsäulen des jeweiligen Anbieters.</p>
+        <p>Der automatische Benachrichtigungsdienst über diverse Kanäle garantiert ebenfalls keine Verfügbarkeit oder Aktualität und versteht sich als ergänzendes Angebot zu den Informationsquellen der Anbieter.</p>
+    </div>
+    <div class="container">
+        <h2>Datenaktualisierung</h2>
+        <p>Die hier gelisteten Treibstoffpreise werden in der Regel im 7-Minuten-Intervall aktualisiert. Da diese Daten von einer Drittschnittstelle bezogen werden, die wahrscheinlich leicht verzögert arbeitet, sind Verzögerungen bis zur Darstellung der aktuellen Preise im Bereich von wenigen Minuten zu erwarten.</p>
+        <p>Statistische Daten sind daher ebenfalls nur unverbindliche Anhaltspunkte.</p>
+        <p>Auf die Qualität und Verfügbarkeit der Preisdaten habe ich keinen Einfluss. Stellen Sie Differenzen fest, können Sie gern eine Mail an die oben genannte Adresse senden.</p>
+    </div>
+{% endblock %}

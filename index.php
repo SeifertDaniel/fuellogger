@@ -20,6 +20,7 @@ class index extends Base
         $callRender = true;
 
         $cl = Registry::getRequest()->getRequestEscapedParameter('cl') ?: 'bestPriceList';
+        Registry::getTwig()->addGlobal('className', $cl);
         $fnc = Registry::getRequest()->getRequestEscapedParameter('fnc') ?: false;
 
         $mapper = new ControllerMapper();
