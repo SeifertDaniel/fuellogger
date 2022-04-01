@@ -8,6 +8,7 @@ use Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier\WhatsApp;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\DailyBestPriceFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\FuelTypeFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\TimeFilter;
+use DateTime;
 
 class NotifierList
 {
@@ -23,8 +24,7 @@ class NotifierList
                 ->addFilter(new TimeFilter('08:00:00', '22:00:00'))
                 ->addFilter(new FuelTypeFilter([Fuel::TYPE_E10]))
                 ->addFilter((new DailyBestPriceFilter())
-                    ->addQueryFilter(new TimeFilter('08:00:00', '22:00:00'))
-                )
+                    ->addQueryFilter(new TimeFilter('08:00:00', (new DateTime())->format('H:i:s'))))
         ];
     }
 }
