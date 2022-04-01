@@ -94,16 +94,14 @@ class BestPriceNotifier
 
         $stationList = $this->getCheapestStationList($type);
 
+        $stationList = is_array($stationList) ? implode( ', ', $stationList ) : $stationList;
+
         /** @var NotifierInterface $notifier */
         foreach((new NotifierList())->getList() as $notifier) {
             Registry::getLogger()->debug(__METHOD__.__LINE__);
             Registry::getLogger()->debug(get_class($notifier));
             try {
-                $notifier->notify(
-                    $type,
-                    $bestPrice,
-                    $stationList
-                );
+                $notifier->notify( $type, $bestPrice, $stationList );
             } catch (filterPreventsNotificationException $e) {
                 Registry::getLogger()->debug($e->getMessage());
             }
