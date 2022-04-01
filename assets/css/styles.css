@@ -57,8 +57,14 @@ table {
             0 0 150px #ffdf00;
 }
 
+footer,
 a {
     color: darkgoldenrod;
+}
+
+#content a {
+    color: #604706;
+    text-decoration: none;
 }
 
 a:hover {
