@@ -15,24 +15,18 @@
                         <tr>
                             <th>Tankstelle</th>
                             <th>Preis</th>
-                            <th>Details</th>
                         </tr>
 
                         {% for priceItem in priceList %}
                             <tr class="{% if priceItem.closed %}closed {% endif %}">
                                 <td>
-                                    {{ priceItem.name }}<br>
+                                    <a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>{{ priceItem.name }}</a><br>
                                     <small>{{ priceItem.place }}</small>
                                     {% if priceItem.closed %}(geschlossen){% endif %}
                                 </td>
                                 <td>
                                     {{ priceItem.price }} &euro;<br>
                                     <small class="text-nowrap">seit {{ priceItem.timediff }}</small>
-                                </td>
-                                <td class="text-center">
-                                    <a href='index.php?cl=stationPriceList&stationId={{ priceItem.id }}'>
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
