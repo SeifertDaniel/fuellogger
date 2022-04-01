@@ -35,6 +35,8 @@ class stationPriceList implements controllerInterface
      */
     public function render(): string
     {
+        startProfile(__METHOD__);
+
         $stationId = Registry::getRequest()->getRequestEscapedParameter('stationId');
         $conn = DBConnection::getConnection();
 
@@ -43,6 +45,8 @@ class stationPriceList implements controllerInterface
         Registry::getTwig()->addGlobal('currPrices', $this->getCurrentPrices($stationId, $conn));
         Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
         Registry::getTwig()->addGlobal('lists', $this->getPriceStatsLists($stationId, $conn));
+
+        stopProfile(__METHOD__);
 
         return 'pages/stationPriceList.html.twig';
     }
@@ -54,8 +58,14 @@ class stationPriceList implements controllerInterface
      */
     public function getOpeningTimes($stationId): array
     {
+        startProfile(__METHOD__);
+
         $ot = new openingTimes($stationId);
-        return $ot->getOpeningTimesList();
+        $list = $ot->getOpeningTimesList();
+
+        stopProfile(__METHOD__);
+
+        return $list;
     }
 
     public function getGraph()

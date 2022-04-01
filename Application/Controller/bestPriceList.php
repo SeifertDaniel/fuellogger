@@ -19,14 +19,31 @@ class bestPriceList implements controllerInterface
      */
     public function render(): string
     {
+        startProfile(__METHOD__);
+
+        Registry::getTwig()->addGlobal('fuelPrices', $this->getBestPrices());
+
+        stopProfile(__METHOD__);
+
+        return 'pages/bestPriceList.html.twig';
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function getBestPrices(): array
+    {
+        startProfile(__METHOD__);
+
         $fuelPrices = [];
         foreach (Fuel::getTypes() as $type) {
             $qb = (new BestPrice())->getTimeDiffSortedQueryBuilder($type);
             $fuelPrices[$type] = $qb->fetchAllAssociative();
         }
 
-        Registry::getTwig()->addGlobal('fuelPrices', $fuelPrices);
+        stopProfile(__METHOD__);
 
-        return 'pages/bestPriceList.html.twig';
+        return $fuelPrices;
     }
 }

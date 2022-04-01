@@ -18,9 +18,13 @@ class BestPriceNotifier
      */
     public function __construct(array $updatePrices)
     {
+        startProfile(__METHOD__);
+
         $this->updatePrices = $updatePrices;
 
         $this->shouldNotify();
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -86,6 +90,8 @@ class BestPriceNotifier
      */
     protected function notify($bestPrice, string $type = Fuel::TYPE_E10)
     {
+        startProfile(__METHOD__);
+
         $stationList = $this->getCheapestStationList($type);
 
         /** @var NotifierInterface $notifier */
@@ -102,6 +108,8 @@ class BestPriceNotifier
                 Registry::getLogger()->debug($e->getMessage());
             }
         }
+
+        stopProfile(__METHOD__);
     }
 
     /**

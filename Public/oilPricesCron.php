@@ -31,6 +31,8 @@ class oilPricesCron extends Base
 
     public function addCurrent()
     {
+        startProfile(__METHOD__);
+
         $oilPrice = new OilPrice();
         $checkDate = (new DateTime())->format('Y-m-d');
 
@@ -46,6 +48,7 @@ class oilPricesCron extends Base
             Registry::getLogger()->error($e->getMessage());
         }
 
+        stopProfile(__METHOD__);
     }
 }
 

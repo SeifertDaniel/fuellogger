@@ -15,6 +15,8 @@ class index extends Base
     {
         parent::__construct();
 
+        startProfile(__METHOD__);
+
         $callRender = true;
 
         $cl = Registry::getRequest()->getRequestEscapedParameter('cl') ?: 'bestPriceList';
@@ -34,6 +36,8 @@ class index extends Base
             $template = Registry::getTwig()->load($tpl);
             echo $template->render();
         }
+
+        stopProfile(__METHOD__);
 
         $this->finalize();
     }

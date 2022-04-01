@@ -45,6 +45,8 @@ class fuelPricesCron extends Base
      */
     public function addCurrent()
     {
+        startProfile(__METHOD__);
+
         $updatePrices = [];
         foreach (Fuel::getTypes() as $type) {
             $updatePrices[$type] = [];
@@ -89,6 +91,8 @@ class fuelPricesCron extends Base
         Registry::getLogger()->debug(serialize($updatePrices));
 
         new BestPriceNotifier($updatePrices);
+
+        stopProfile(__METHOD__);
     }
 
     /**
