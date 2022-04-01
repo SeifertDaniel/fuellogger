@@ -1,0 +1,8 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__FILE__) . "/../bootstrap.php";
+
+$finder = new \Symfony\Component\Finder\Finder();
+$fs = new \Symfony\Component\Filesystem\Filesystem();
+$fs->remove($finder->directories()->in(TMP_PATH.'twig/'));

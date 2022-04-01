@@ -11,7 +11,8 @@
         "monolog/monolog": "^2.3",
         "doctrine/migrations": "^3.4",
         "zetacomponents/graph": "1.6.0alpha1",
-        "twig/twig":"^3.3"
+        "twig/twig":"^3.3",
+        "symfony/finder":"^6.0"
     },
     "license": "MIT",
     "autoload": {
@@ -28,6 +29,7 @@
     ],
     "bin": [
         "bin/fuelPricesCron",
-        "bin/oilPricesCron"
+        "bin/oilPricesCron",
+        "bin/clearTmp"
     ]
 }
