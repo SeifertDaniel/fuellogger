@@ -120,7 +120,7 @@ class BestPriceNotifier
             ->where(
                 $qb->expr()->eq(
                     'tmpTbl.price',
-                    "(".$subQb->select('MIN(pr.price)')->getSQL().")"
+                    "(".$subQb->select('MIN(pr.price)')->setMaxResults(1)->getSQL().")"
                 )
             );
 
