@@ -54,11 +54,7 @@ class BestPriceNotifier
 
             $lowestUpdatePrice = $this->getLowestUpdatePrice($type);
 
-            Registry::getLogger()->debug(__METHOD__.__LINE__);
-            Registry::getLogger()->debug($type .' => '.$qb->fetchOne().' > '.$lowestUpdatePrice);
-
             if (isset($lowestUpdatePrice) && $qb->fetchOne() > $lowestUpdatePrice) {
-                Registry::getLogger()->debug(__METHOD__.__LINE__);
                 $this->notify($lowestUpdatePrice, $type);
             }
         }
@@ -94,12 +90,8 @@ class BestPriceNotifier
 
         $stationList = $this->getCheapestStationList($type);
 
-        $stationList = is_array($stationList) ? implode( ', ', $stationList ) : $stationList;
-
         /** @var NotifierInterface $notifier */
         foreach((new NotifierList())->getList() as $notifier) {
-            Registry::getLogger()->debug(__METHOD__.__LINE__);
-            Registry::getLogger()->debug(get_class($notifier));
             try {
                 $notifier->notify( $type, $bestPrice, $stationList );
             } catch (filterPreventsNotificationException $e) {

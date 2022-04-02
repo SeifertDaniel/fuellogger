@@ -50,7 +50,7 @@ class fuelPricesCron extends Base
         $updatePrices = [];
         foreach (Fuel::getTypes() as $type) {
             $updatePrices[$type] = [];
-        };
+        }
 
         foreach ($this->getStations() as $stationTkId => $stationData) {
             $station = new Station();
@@ -87,8 +87,6 @@ class fuelPricesCron extends Base
                 }
             }
         }
-
-        Registry::getLogger()->debug(serialize($updatePrices));
 
         new BestPriceNotifier($updatePrices);
 

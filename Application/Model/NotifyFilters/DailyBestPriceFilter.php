@@ -4,7 +4,6 @@ namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\Price;
-use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 
 class DailyBestPriceFilter extends AbstractQueryFilter
@@ -51,7 +50,7 @@ class DailyBestPriceFilter extends AbstractQueryFilter
             )
             ->orderBy('pr.price', 'ASC')
             ->setMaxResults(1);
-Registry::getLogger()->debug($qb->getSQL());
+
         return (float) $qb->fetchOne();
     }
 
