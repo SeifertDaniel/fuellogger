@@ -45,6 +45,7 @@ class WebHook extends AbstractNotifier implements NotifierInterface
             return $response->getStatusCode() === 200;
         } catch (GuzzleException $e) {
             Registry::getLogger()->error($e->getMessage());
+            Registry::getLogger()->error($e->getTraceAsString());
             return false;
         }
     }

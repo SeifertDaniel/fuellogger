@@ -26,7 +26,10 @@ class priceTrend implements controllerInterface
 
     public function init() {}
 
-    public function render()
+    /**
+     * @return string
+     */
+    public function render(): string
     {
         Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
 
@@ -88,6 +91,7 @@ class priceTrend implements controllerInterface
             $graph->renderToOutput( 1200, 600 );
         } catch ( Exception $e) {
             Registry::getLogger()->error($e->getMessage());
+            Registry::getLogger()->error($e->getTraceAsString());
         }
 
         die();

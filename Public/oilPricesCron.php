@@ -36,17 +36,13 @@ class oilPricesCron extends Base
         $oilPrice = new OilPrice();
         $checkDate = (new DateTime())->format('Y-m-d');
 
-        try {
-            if ($oilPrice->existForDate($checkDate)) {
-                throw new Exception('oil price exists already for ' . $checkDate);
-            }
-
-            $rates = $this->api->request([CommoditiesApi::SYMBOL_BRENTOIL]);
-
-            $oilPrice->insert(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
-        } catch (Exception $e) {
-            Registry::getLogger()->error($e->getMessage());
+        if ($oilPrice->existForDate($checkDate)) {
+            throw new Exception('oil price exists already for ' . $checkDate);
         }
+
+        $rates = $this->api->request([CommoditiesApi::SYMBOL_BRENTOIL]);
+
+        $oilPrice->insert(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
 
         stopProfile(__METHOD__);
     }
@@ -56,4 +52,5 @@ try {
     new oilPricesCron();
 } catch (Exception $e) {
     Registry::getLogger()->error($e->getMessage());
+    Registry::getLogger()->error($e->getTraceAsString());
 }

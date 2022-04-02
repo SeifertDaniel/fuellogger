@@ -122,7 +122,8 @@ class stationPriceList implements controllerInterface
 
             $graph->renderToOutput( 1200, 600 );
         } catch ( Exception $e) {
-            print_r($e->getMessage());
+            Registry::getLogger()->error($e->getMessage());
+            Registry::getLogger()->error($e->getTraceAsString());
         }
 
         die();

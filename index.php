@@ -48,4 +48,5 @@ try {
     new index();
 } catch (\Exception $e) {
     Registry::getLogger()->error($e->getMessage());
+    Registry::getLogger()->error($e->getTraceAsString());
 }
