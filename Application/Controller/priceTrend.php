@@ -3,6 +3,7 @@
 namespace Daniels\FuelLogger\Application\Controller;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\ezcGraph\svgFixer;
 use Daniels\FuelLogger\Application\Model\OilPrice;
 use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Core\Registry;
@@ -28,73 +29,72 @@ class priceTrend implements controllerInterface
 
     /**
      * @return string
+     * @throws DoctrineException
      */
     public function render(): string
     {
         Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
+        Registry::getTwig()->addGlobal('chart', $this->getSvg());
 
         return 'pages/priceTrend.html.twig';
     }
 
     /**
+     * @return void
      * @throws DoctrineException
      */
     public function getGraph()
     {
-        try {
-            $conn = DBConnection::getConnection();
+        startProfile(__METHOD__);
 
-            $fuelStats = $this->getFuelStats( $conn );
-            $oilStats  = $this->getOilStats( $conn );
+        $conn = DBConnection::getConnection();
 
-            $allStats = array_merge( $fuelStats, $oilStats );
+        $fuelStats = $this->getFuelStats( $conn );
+        $oilStats  = $this->getOilStats( $conn );
 
-            $graph = new ezcGraphLineChart();
+        $allStats = array_merge( $fuelStats, $oilStats );
 
-            // colors
-            //$graph->background->background = new ezcGraphColor(['red'   => 255, 'green' => 255, 'blue'  => 255]);
-            $graph->palette          = $palette = new ezcGraphPaletteBlack();
-            $palette->minorGridColor = new ezcGraphColor( [ 'red'   => 255,
-                                                            'green' => 255,
-                                                            'blue'  => 255,
-                                                            'alpha' => 255
-                                                          ] );
+        $graph = new ezcGraphLineChart();
 
-            // axis
-            $graph->yAxis->label                    = 'Benzinpreis';
-            $graph->xAxis->axisLabelRenderer        = new ezcGraphAxisRotatedLabelRenderer();
-            $graph->xAxis->axisLabelRenderer->angle = 0;
-            $graph->xAxis->axisSpace                = .25;
+        // colors
+        //$graph->background->background = new ezcGraphColor(['red'   => 255, 'green' => 255, 'blue'  => 255]);
+        $graph->palette          = $palette = new ezcGraphPaletteBlack();
+        $palette->minorGridColor = new ezcGraphColor( [ 'red'   => 255,
+            'green' => 255,
+            'blue'  => 255,
+            'alpha' => 255
+        ] );
 
-            // legend
-            $graph->legend->position      = ezcGraph::BOTTOM;
-            $graph->legend->landscapeSize = .1;
-            $graph->legend->border        = new ezcGraphColor( [ 'red'   => 255,
-                                                                 'green' => 255,
-                                                                 'blue'  => 255,
-                                                                 'alpha' => 255
-                                                               ] );
+        // axis
+        $graph->yAxis->label                    = 'Benzinpreis';
+        $graph->xAxis->axisLabelRenderer        = new ezcGraphAxisRotatedLabelRenderer();
+        $graph->xAxis->axisLabelRenderer->angle = 0;
+        $graph->xAxis->axisSpace                = .25;
 
-            // data
-            foreach ( $allStats as $fuelType => $data ) {
-                $data                     = new ezcGraphArrayDataSet( $data );
-                $graph->data[ $fuelType ] = $data;
-            }
+        // legend
+        $graph->legend->position      = ezcGraph::BOTTOM;
+        $graph->legend->landscapeSize = .1;
+        $graph->legend->border        = new ezcGraphColor( [ 'red'   => 255,
+            'green' => 255,
+            'blue'  => 255,
+            'alpha' => 255
+        ] );
 
-            // additional axis
-            $graph->additionalAxis['oilprice']        = $nAxis = new ezcGraphChartElementNumericAxis();
-            $nAxis->position                          = ezcGraph::BOTTOM;
-            $nAxis->chartPosition                     = 1;
-            $nAxis->label                             = 'Oelpreis';
-            $graph->data[ ucfirst( 'brent' ) ]->yAxis = $nAxis;
-
-            $graph->renderToOutput( 1200, 600 );
-        } catch ( Exception $e) {
-            Registry::getLogger()->error($e->getMessage());
-            Registry::getLogger()->error($e->getTraceAsString());
+        // data
+        foreach ( $allStats as $fuelType => $data ) {
+            $data                     = new ezcGraphArrayDataSet( $data );
+            $graph->data[ $fuelType ] = $data;
         }
 
-        die();
+        // additional axis
+        $graph->additionalAxis['oilprice']        = $nAxis = new ezcGraphChartElementNumericAxis();
+        $nAxis->position                          = ezcGraph::BOTTOM;
+        $nAxis->chartPosition                     = 1;
+        $nAxis->label                             = 'Oelpreis';
+        $graph->data[ ucfirst( 'brent' ) ]->yAxis = $nAxis;
+        $graph->renderToOutput( 1200, 600 );
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -105,6 +105,8 @@ class priceTrend implements controllerInterface
      */
     protected function getFuelStats( ?Connection $conn ): array
     {
+        startProfile(__METHOD__);
+
         $prices     = new Price();
         $priceTable = $prices->getCoreTableName();
 
@@ -126,6 +128,8 @@ class priceTrend implements controllerInterface
             $fuelStats[ ucfirst($price['type']) ][ $price['date'] ] = $price['price'];
         }
 
+        stopProfile(__METHOD__);
+
         return $fuelStats;
     }
 
@@ -137,6 +141,8 @@ class priceTrend implements controllerInterface
      */
     protected function getOilStats( ?Connection $conn ): array
     {
+        startProfile(__METHOD__);
+
         $prices     = new OilPrice();
         $priceTable = $prices->getCoreTableName();
 
@@ -158,6 +164,31 @@ class priceTrend implements controllerInterface
             $oilStats[ ucfirst('brent') ][ $price['date'] ] = $price['price'];
         }
 
+        stopProfile(__METHOD__);
+
         return $oilStats;
+    }
+
+    /**
+     * @return string
+     * @throws DoctrineException
+     */
+    public function getSvg(): string
+    {
+        startProfile(__METHOD__);
+
+        ob_start();
+        $this->getGraph();
+        $svg = ob_get_contents();
+        ob_end_clean();
+
+        $svgFixer = new svgFixer();
+        $svgFixer->fixHeaderToHtml();
+
+        $svg = $svgFixer->makeResponsive($svg);
+
+        stopProfile(__METHOD__);
+
+        return $svg;
     }
 }

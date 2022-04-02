@@ -6,6 +6,8 @@
     <div class="container">
         <h2>Preishistorie</h2>
 
-        <img src="{{ requestUrl }}&amp;fnc=getGraph" style="width: 100%">
+        <div class="svg">
+            {{ chart|raw }}
+        </div>
     </div>
 {% endblock %}

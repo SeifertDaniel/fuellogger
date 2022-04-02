@@ -5,6 +5,7 @@ namespace Daniels\FuelLogger\Application\Controller;
 use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\ezcGraph\ezcFlexibleColor2DRenderer;
 use Daniels\FuelLogger\Application\Model\ezcGraph\ezcGraphArrayDataSetOpneningTimesColors;
+use Daniels\FuelLogger\Application\Model\ezcGraph\svgFixer;
 use Daniels\FuelLogger\Application\Model\Fuel;
 use Daniels\FuelLogger\Application\Model\openingTimes;
 use Daniels\FuelLogger\Application\Model\Price;
@@ -14,6 +15,8 @@ use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Exception;
+use ezcBasePropertyNotFoundException;
+use ezcBaseValueException;
 use ezcGraph;
 use ezcGraphAxisRotatedLabelRenderer;
 use ezcGraphColor;
@@ -45,6 +48,7 @@ class stationPriceList implements controllerInterface
         Registry::getTwig()->addGlobal('currPrices', $this->getCurrentPrices($stationId, $conn));
         Registry::getTwig()->addGlobal('requestUrl', Registry::getRequest()->getRequestUrl());
         Registry::getTwig()->addGlobal('lists', $this->getPriceStatsLists($stationId, $conn));
+        Registry::getTwig()->addGlobal('chart', $this->getSvg());
 
         stopProfile(__METHOD__);
 
@@ -68,65 +72,68 @@ class stationPriceList implements controllerInterface
         return $list;
     }
 
+    /**
+     * @return void
+     * @throws DoctrineException
+     * @throws ezcBasePropertyNotFoundException
+     * @throws ezcBaseValueException
+     */
     public function getGraph()
     {
-        try {
-            $stationId = Registry::getRequest()->getRequestEscapedParameter( 'stationId' );
-            $conn      = DBConnection::getConnection();
+        startProfile(__METHOD__);
 
-            $source       = $this->getPriceSourceForChart( $conn, $stationId );
-            $openingTimes = new openingTimes( $stationId );
+        $stationId = Registry::getRequest()->getRequestEscapedParameter( 'stationId' );
+        $conn      = DBConnection::getConnection();
 
-            $graph           = new ezcGraphLineChart();
-            $graph->renderer = new ezcFlexibleColor2DRenderer();
+        $source       = $this->getPriceSourceForChart( $conn, $stationId );
+        $openingTimes = new openingTimes( $stationId );
 
-            // colors
-            //$graph->background->background = new ezcGraphColor(['red'   => 255, 'green' => 255, 'blue'  => 255]);
-            $graph->palette          = $palette = new ezcGraphPaletteBlack();
-            $palette->minorGridColor = new ezcGraphColor( [
-                                                              'red'   => 255,
-                                                              'green' => 255,
-                                                              'blue'  => 255,
-                                                              'alpha' => 255
-                                                          ] );
-            $palette->dataSetSymbol = [ezcGraph::NO_SYMBOL];
+        $graph           = new ezcGraphLineChart();
+        $graph->renderer = new ezcFlexibleColor2DRenderer();
 
-            // axis
-            $graph->yAxis->label                    = 'Benzinpreis';
-            $graph->xAxis->axisLabelRenderer        = new ezcGraphAxisRotatedLabelRenderer();
-            $graph->xAxis->axisLabelRenderer->angle = 0;
-            $graph->xAxis->axisSpace                = .25;
+        // colors
+        //$graph->background->background = new ezcGraphColor(['red'   => 255, 'green' => 255, 'blue'  => 255]);
+        $graph->palette          = $palette = new ezcGraphPaletteBlack();
+        $palette->minorGridColor = new ezcGraphColor( [
+                                                          'red'   => 255,
+                                                          'green' => 255,
+                                                          'blue'  => 255,
+                                                          'alpha' => 255
+                                                      ] );
+        $palette->dataSetSymbol = [ezcGraph::NO_SYMBOL];
 
-            // legend
-            $graph->legend->position      = ezcGraph::BOTTOM;
-            $graph->legend->landscapeSize = .1;
-            $graph->legend->border        = new ezcGraphColor( [ 'red'   => 255,
-                                                                 'green' => 255,
-                                                                 'blue'  => 255,
-                                                                 'alpha' => 255
-                                                               ] );
+        // axis
+        $graph->yAxis->label                    = 'Benzinpreis';
+        $graph->xAxis->axisLabelRenderer        = new ezcGraphAxisRotatedLabelRenderer();
+        $graph->xAxis->axisLabelRenderer->angle = 0;
+        $graph->xAxis->axisSpace                = .25;
 
-            // Add data
-            foreach ( $source as $fuelType => $data ) {
-                $data  = new ezcGraphArrayDataSetOpneningTimesColors( $data );
-                $color = new ezcGraphDataSetColorProperty( $data );
-                foreach ( $data->getKeys() as $key ) {
-                    if ( $openingTimes->isClosedCached( $key, $openingTimes->getWeekdayByDate( $key ) ) ) {
-                        $color->offsetSet( $key, new ezcGraphColor( [ 'red' => 190, 'blue' => 190, 'green' => 190 ] ) );
-                    }
+        // legend
+        $graph->legend->position      = ezcGraph::BOTTOM;
+        $graph->legend->landscapeSize = .1;
+        $graph->legend->border        = new ezcGraphColor( [ 'red'   => 255,
+                                                             'green' => 255,
+                                                             'blue'  => 255,
+                                                             'alpha' => 255
+                                                           ] );
+
+        // Add data
+        foreach ( $source as $fuelType => $data ) {
+            $data  = new ezcGraphArrayDataSetOpneningTimesColors( $data );
+            $color = new ezcGraphDataSetColorProperty( $data );
+            foreach ( $data->getKeys() as $key ) {
+                if ( $openingTimes->isClosedCached( $key, $openingTimes->getWeekdayByDate( $key ) ) ) {
+                    $color->offsetSet( $key, new ezcGraphColor( [ 'red' => 190, 'blue' => 190, 'green' => 190 ] ) );
                 }
-                $data->setProperty( 'color', $color );
-
-                $graph->data[ $fuelType ] = $data;
             }
+            $data->setProperty( 'color', $color );
 
-            $graph->renderToOutput( 1200, 600 );
-        } catch ( Exception $e) {
-            Registry::getLogger()->error($e->getMessage());
-            Registry::getLogger()->error($e->getTraceAsString());
+            $graph->data[ $fuelType ] = $data;
         }
 
-        die();
+        $graph->renderToOutput( 1200, 600 );
+
+        stopProfile(__METHOD__);
     }
 
     /**
@@ -138,6 +145,8 @@ class stationPriceList implements controllerInterface
      */
     protected function getPriceSourceForChart( ?Connection $conn, string $stationId ): array
     {
+        startProfile(__METHOD__);
+
         $interval         = 5; // minutes
         $intervalSec      = $interval * 60; // secondes
         $duration         = 1; // week
@@ -172,6 +181,8 @@ class stationPriceList implements controllerInterface
 
             $source[ ucfirst( $type ) ] = $fetched;
         }
+
+        stopProfile(__METHOD__);
 
         return $source;
     }
@@ -221,6 +232,32 @@ class stationPriceList implements controllerInterface
             $lists[$type]['prices'] = $qb->fetchAllAssociative();
         }
         return $lists;
+    }
+
+
+    /**
+     * @return string
+     * @throws DoctrineException
+     * @throws ezcBasePropertyNotFoundException
+     * @throws ezcBaseValueException
+     */
+    public function getSvg(): string
+    {
+        startProfile(__METHOD__);
+
+        ob_start();
+        $this->getGraph();
+        $svg = ob_get_contents();
+        ob_end_clean();
+
+        $svgFixer = new svgFixer();
+        $svgFixer->fixHeaderToHtml();
+
+        $svg = $svgFixer->makeResponsive($svg);
+
+        stopProfile(__METHOD__);
+
+        return $svg;
     }
 
     /**
