@@ -2,8 +2,13 @@
 
 namespace Daniels\FuelLogger\Core;
 
-class DebugInfo
+class Debug
 {
+    const MODE_LOGGING = 1;
+    const MODE_DISPLAYERRORS = 2;
+    const MODE_NOTWIGCACHE = 4;
+    const MODE_SHOWPROFILING = 8;
+
     /**
      * @param $dTotalTime
      * @return string
@@ -35,5 +40,37 @@ class DebugInfo
         }
 
         return $log;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function useTwigCaching(): bool
+    {
+        return false === (($_ENV['DEBUGMODES'] & self::MODE_NOTWIGCACHE) === self::MODE_NOTWIGCACHE);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function displayErrors(): bool
+    {
+        return ($_ENV['DEBUGMODES'] & self::MODE_DISPLAYERRORS) === self::MODE_DISPLAYERRORS;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function logDebugMessages(): bool
+    {
+        return ($_ENV['DEBUGMODES'] & self::MODE_LOGGING) === self::MODE_LOGGING;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function showProfiling(): bool
+    {
+        return ($_ENV['DEBUGMODES'] & self::MODE_SHOWPROFILING) === self::MODE_SHOWPROFILING;
     }
 }

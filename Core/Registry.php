@@ -58,7 +58,7 @@ class Registry
             $loader = new FilesystemLoader($_ENV['ROOTDIR'].'src/Templates');
             $twig = new Environment($loader, [
                 'cache' => $_ENV['ROOTDIR'].'tmp/twig',
-                'debug' => (bool) $_ENV['DEBUGMODE']
+                'debug' => Debug::useTwigCaching()
             ]);
 
             self::set('twig', $twig);

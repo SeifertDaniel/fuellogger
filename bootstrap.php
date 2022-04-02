@@ -1,5 +1,6 @@
 <?php
 
+use Daniels\FuelLogger\Core\Debug;
 use Dotenv\Dotenv;
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
@@ -19,14 +20,14 @@ $dotenv->required([
     'DBUSER',
     'DBPASS',
     'DBDRIVER',
-    'DEBUGMODE',
+    'DEBUGMODES',
     'TKAPIKEY',
     'LOCATIONLAT',
     'LOCATIONLNG',
     'COMMODITIESAPIKEY'
 ])->notEmpty();
 
-if ($_ENV['DEBUGMODE']) {
+if (Debug::displayErrors()) {
     ini_set('display_errors', 1);
     error_reporting(E_ALL & ~E_DEPRECATED);
 }

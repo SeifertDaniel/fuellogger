@@ -9,17 +9,17 @@ class Base
 
     public function __construct()
     {
-        if ($_ENV['DEBUGMODE']) {
+        if (Debug::showProfiling()) {
             $this->timeStart = microtime(true);
         }
     }
 
     public function finalize()
     {
-        if ($_ENV['DEBUGMODE']) {
+        if (Debug::showProfiling()) {
             $this->timeEnd = microtime(true);
 
-            $debugInfo = new DebugInfo();
+            $debugInfo = new Debug();
             echo $debugInfo->formatExecutionTime($this->getTotalTime());
         }
     }

@@ -2,6 +2,7 @@
 
 namespace Daniels\FuelLogger\Application\Model;
 
+use Daniels\FuelLogger\Core\Debug;
 use Monolog\Handler\FilterHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger as MonologLogger;
@@ -24,7 +25,7 @@ class Logger
      */
     public function pushHandler(MonologLogger $logger): MonologLogger
     {
-        if ($_ENV['DEBUGMODE']) {
+        if (Debug::logDebugMessages()) {
             $logger->pushHandler(new RotatingFileHandler($_ENV['ROOTDIR'] . 'src/log/debug.log', 5, MonologLogger::DEBUG, false));
         }
         $logger->pushHandler(new RotatingFileHandler($_ENV['ROOTDIR'].'src/log/error.log', 10, MonologLogger::ERROR));
