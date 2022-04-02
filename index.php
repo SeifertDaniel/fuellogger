@@ -35,8 +35,10 @@ class index extends Base
         }
         if ($callRender) {
             $tpl = $controller->render();
+            startProfile(__METHOD__.' (rendering)');
             $template = Registry::getTwig()->load($tpl);
             echo $template->render();
+            stopProfile(__METHOD__.' (rendering)');
         }
 
         stopProfile(__METHOD__);

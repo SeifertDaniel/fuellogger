@@ -21,7 +21,7 @@ class Debug
         if (is_array($aProfileTimes)) {
             $log .= "----------------------------------------------------------<br>" . PHP_EOL;
             arsort($aProfileTimes);
-            $log .= "<table cellspacing='10px' style='border: 1px solid #000'>";
+            $log .= "<table cellspacing='10px' style='border: 1px solid #000' class='debugTable'>";
             foreach ($aProfileTimes as $key => $val) {
                 $log .= "<tr><td style='border-bottom: 1px dotted #000;min-width:300px;'>Profile $key: </td><td style='border-bottom: 1px dotted #000;min-width:100px;'>" . round($val, 5) . "s</td>";
                 if ($dTotalTime) {
