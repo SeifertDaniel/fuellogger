@@ -61,8 +61,10 @@ class WebHook extends AbstractNotifier implements NotifierInterface
                 CURLOPT_RETURNTRANSFER  => false,
                 CURLOPT_SSL_VERIFYPEER  => false,
             ],
+            'connect_timeout' => 15,
+            'read_timeout' => 45,
+            'timeout' => 60,
 
-            //'body' => json_encode([$this->message]),
             'body' => '{"value1": "'.$message.'"}',
             'headers' => $this->getHeaders()
         ];

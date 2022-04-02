@@ -40,7 +40,11 @@ class CallMeBot extends AbstractNotifier implements NotifierInterface
             $url = 'https://api.callmebot.com/whatsapp.php?source=php&phone=' . $this->phoneNumber . '&text=' . urlencode($message) . '&apikey=' . $this->apiKey;
 
             $client = new Client();
-            $response = $client->get($url);
+            $response = $client->get($url, [
+                'connect_timeout' => 15,
+                'read_timeout' => 45,
+                'timeout' => 60
+            ]);
 
             return $response->getStatusCode() == 200;
         } catch (GuzzleException $e) {
