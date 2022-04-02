@@ -3,10 +3,12 @@
 namespace Daniels\FuelLogger\PublicDir;
 
 use Daniels\FuelLogger\Application\Model\OilPrice;
+use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApiException;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
 use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApi;
 use DateTime;
+use Doctrine\DBAL\Exception as DoctrineException;
 use Exception;
 
 require_once dirname(__FILE__) . "/../bootstrap.php";
@@ -16,7 +18,8 @@ class oilPricesCron extends Base
     protected CommoditiesApi $api;
 
     /**
-     * @throws Exception
+     * @throws CommoditiesApiException
+     * @throws DoctrineException
      */
     public function __construct()
     {
@@ -29,6 +32,11 @@ class oilPricesCron extends Base
         $this->finalize();
     }
 
+    /**
+     * @return void
+     * @throws CommoditiesApiException
+     * @throws DoctrineException
+     */
     public function addCurrent()
     {
         startProfile(__METHOD__);

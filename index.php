@@ -6,6 +6,7 @@ use Daniels\FuelLogger\Application\Controller\controllerInterface;
 use Daniels\FuelLogger\Application\Model\ControllerMapper;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
+use Exception;
 
 require_once dirname(__FILE__) . "/bootstrap.php";
 
@@ -46,7 +47,7 @@ class index extends Base
 
 try {
     new index();
-} catch (\Exception $e) {
+} catch (Exception $e) {
     Registry::getLogger()->error($e->getMessage());
     Registry::getLogger()->error($e->getTraceAsString());
 }
