@@ -10,14 +10,6 @@ const TMP_PATH = INSTALLATION_ROOT_PATH . DIRECTORY_SEPARATOR . 'tmp' . DIRECTOR
 
 require_once VENDOR_PATH.'autoload.php';
 
-if (Debug::displayErrors()) {
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL & ~E_DEPRECATED);
-} else {
-    ini_set('display_errors', 0);
-    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
-}
-
 $dotenv = Dotenv::createImmutable(__DIR__."/..");
 $dotenv->load();
 $dotenv->required([
@@ -32,5 +24,13 @@ $dotenv->required([
     'LOCATIONLNG',
     'COMMODITIESAPIKEY'
 ])->notEmpty();
+
+if (Debug::displayErrors()) {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL & ~E_DEPRECATED);
+} else {
+    ini_set('display_errors', 0);
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+}
 
 require_once BASE_PATH . 'functions.php';
