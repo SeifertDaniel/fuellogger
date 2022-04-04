@@ -105,17 +105,27 @@ class priceTrend implements controllerInterface
 
         $prices     = new Price();
         $priceTable = $prices->getCoreTableName();
+        $pricesArchive = new PriceArchive();
+        $priceArchiveTable = $pricesArchive->getCoreTableName();
 
-        $qb = $conn->createQueryBuilder();
-        $qb->select( 'AVG(pr.price) as price', 'DATE_FORMAT(pr.datetime, "%Y-%m-%d") as date', 'pr.type' )
+        $qb1 = $conn->createQueryBuilder();
+        $qb1->select( 'pra.avg as price', 'pra.date', 'pra.type' )
+            ->from( $priceArchiveTable, 'pra' );
+
+        $qb2 = $conn->createQueryBuilder();
+        $qb2->select( 'AVG(pr.price) as price', 'DATE_FORMAT(pr.datetime, "%Y-%m-%d") as date', 'pr.type' )
            ->from( $priceTable, 'pr' )
            ->where(
-               $qb->expr()->lt(
+               $qb2->expr()->lt(
                    'DATE_FORMAT(pr.datetime, "%Y-%m-%d")',
                    'DATE_FORMAT(NOW(), "%Y-%m-%d")'
                )
            )->groupBy( 'DATE_FORMAT(pr.datetime, "%Y-%m-%d")', 'pr.type' )
-            ->orderBy( 'DATE_FORMAT(pr.datetime, "%Y-%m-%d")', 'ASC' );
+            ->orderBy( 'date', 'ASC' );
+
+        $qb = $conn->createQueryBuilder()
+            ->select('*')
+            ->from('('.implode(' UNION ', [$qb1->getSQL(), $qb2->getSQL()]).')', 'tmp');
 
         $prices = $qb->fetchAllAssociative();
 
