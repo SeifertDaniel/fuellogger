@@ -33,7 +33,7 @@ class Registry
     /**
      * @return Request
      */
-    public static function getRequest()
+    public static function getRequest(): Request
     {
         return self::getObject(Request::class);
     }
@@ -41,7 +41,7 @@ class Registry
     /**
      * @return \Monolog\Logger
      */
-    public static function getLogger()
+    public static function getLogger(): \Monolog\Logger
     {
         if (!self::instanceExists('logger')) {
             self::set('logger', (new Logger())->getLogger());

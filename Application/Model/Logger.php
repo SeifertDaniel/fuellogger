@@ -12,7 +12,7 @@ class Logger
     /**
      * @return MonologLogger
      */
-    public function getLogger()
+    public function getLogger(): MonologLogger
     {
         $logger = new MonologLogger( 'fuelLogger');
         return $this->pushHandler($logger);
@@ -28,6 +28,7 @@ class Logger
         if (Debug::logDebugMessages()) {
             $logger->pushHandler(new RotatingFileHandler($_ENV['ROOTDIR'] . 'src/log/debug.log', 5, MonologLogger::DEBUG, false));
         }
+
         $logger->pushHandler(new RotatingFileHandler($_ENV['ROOTDIR'].'src/log/error.log', 10, MonologLogger::ERROR));
 
         $infoStreamHandler = new RotatingFileHandler($_ENV['ROOTDIR'].'src/log/info.log', 5, MonologLogger::INFO);
