@@ -28,7 +28,6 @@ class stationPriceList implements controllerInterface
 {
     public function __construct()
     {
-        ini_set('display_errors', 1);
     }
 
     public function init() {}
@@ -290,7 +289,6 @@ class stationPriceList implements controllerInterface
      */
     public function getCurrentPrices(string $stationId, Connection $conn): array
     {
-        ini_set('display_errors', 1);
         $price = new Price();
         $priceTable = $price->getCoreTableName();
 

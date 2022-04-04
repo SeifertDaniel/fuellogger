@@ -21,11 +21,6 @@ use ezcGraphPaletteBlack;
 
 class priceTrend implements controllerInterface
 {
-    public function __construct()
-    {
-        ini_set('display_errors', 1);
-    }
-
     public function init() {}
 
     /**
