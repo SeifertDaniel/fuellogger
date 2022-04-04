@@ -6,6 +6,7 @@ use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\ezcGraph\svgFixer;
 use Daniels\FuelLogger\Application\Model\OilPrice;
 use Daniels\FuelLogger\Application\Model\Price;
+use Daniels\FuelLogger\Application\Model\PriceArchive;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
