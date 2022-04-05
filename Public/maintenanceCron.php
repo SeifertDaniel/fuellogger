@@ -82,15 +82,16 @@ class maintenanceCron extends Base
 
             $queries = [
                 'START TRANSACTION;',
-                "INSERT INTO " . $priceArchiveTable . " (id, date, type, min, avg, max)
+                "INSERT INTO " . $conn->quoteIdentifier($priceArchiveTable) . " (id, date, type, min, avg, max)
                     SELECT UUID(), DATE_FORMAT(datetime, '%Y-%m-%d') as date, type, MIN(price) as min, AVG(price) as avg, MAX(price) as max 
-                    FROM " . $priceTable . "
+                    FROM " . $conn->quoteIdentifier($priceTable) . "
                     WHERE DATE_FORMAT(datetime, '%Y-%m-%d') < DATE_SUB(NOW(), INTERVAL ".self::DATES_TO_ARCHIVE." DAY)
                     GROUP BY date, type;
                 ",
-                "DELETE FROM " . $priceTable . "
+                "DELETE FROM " . $conn->quoteIdentifier($priceTable) . "
                     WHERE DATE_FORMAT(datetime, '%Y-%m-%d') < DATE_SUB(NOW(), INTERVAL ".self::DATES_TO_ARCHIVE." DAY);
                 ",
+                "OPTIMIZE TABLE ".$conn->quoteIdentifier($priceTable).";",
                 "COMMIT;"
             ];
 
