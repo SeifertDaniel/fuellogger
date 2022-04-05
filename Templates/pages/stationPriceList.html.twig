@@ -6,113 +6,61 @@
     <div class="container">
         <h2>{{ station['stationname'] }}</h2>
 
-        <div class="row">
-            <div class="col-sm">
-                <h3>&Ouml;ffnungszeiten</h3>
-                <table class="table table-bordered table-striped">
-                    {% for day,dayTimes in openingTimes %}
-                        <tr>
-                            <td>
-                                {{ day }}
-                            </td>
-                            <td>
-                                {% for time in dayTimes %}
-                                    {{ time['from'] }} - {{ time['to'] }}<br>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-
-            <div class="col-sm">
-                <h3>Adresse</h3>
-                <table class="table table-bordered table-striped">
-                    <tr>
-                        <td>
-                            {{ station['name'] }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ station['street'] }} {{ station['housenumber'] }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ "%05d"|format(station['postcode']) }} {{ station['place'] }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a href="https://www.google.com/maps/search/?api=1&query={{ station['lat']|url_encode }},{{ station['lon']|url_encode }}">
-                                <i class="fa-solid fa-map-location-dot"></i> auf Google Maps
-                            </a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="col-sm">
-                <h3>aktuelle Preise</h3>
-                <table class="table table-bordered table-striped">
-                    {% for typeprices in currPrices %}
-                        <tr>
-                            <td>
-                                {{ typeprices['type']|capitalize }}
-                            </td>
-                            <td>
-                                {{ typeprices['price'] }} &euro;
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-
-        <div class="svg">
-            {{ chart|raw }}
-        </div>
-
         <nav>
-            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <div class="nav nav-pills" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="nav-stationdata-tab" data-bs-toggle="tab" data-bs-target="#nav-stationdata" type="button" role="tab" aria-controls="nav-stationdata" aria-selected="true">allgem. Angaben</button>
+                <button class="nav-link" id="nav-timegraph-tab" data-bs-toggle="tab" data-bs-target="#nav-timegraph" type="button" role="tab" aria-controls="nav-timegraph" aria-selected="true">Preisdiagramm</button>
                 {% for fuelType,mylists in lists %}
-                    <button class="nav-link{% if loop.first %} active {% endif %}" id="nav-{{ fuelType }}-tab" data-bs-toggle="tab" data-bs-target="#nav-{{ fuelType }}" type="button" role="tab" aria-controls="nav-{{ fuelType }}" aria-selected="true">{{ fuelType|capitalize }}</button>
+                    <button class="nav-link" id="nav-{{ fuelType }}-tab" data-bs-toggle="tab" data-bs-target="#nav-{{ fuelType }}" type="button" role="tab" aria-controls="nav-{{ fuelType }}" aria-selected="true">Preisentwicklung {{ fuelType|capitalize }}</button>
                 {% endfor %}
             </div>
         </nav>
-        <div class="tab-content" id="nav-tabContent">
-            {% for fuelType,mylists in lists %}
-                <div class="tab-pane fade show{% if loop.first %} active {% endif %}" id="nav-{{ fuelType }}" role="tabpanel" aria-labelledby="nav-{{ fuelType }}-tab">
-                    <table class="table table-bordered table-striped">
-                        <tr>
-                            <th>Datum</th>
-                            <th>durchschn. Erh&ouml;hung</th>
-                            <th>durchschn. Haltezeit Tiefpreis</th>
-                        </tr>
-                        {% for statItem in mylists['stat'] %}
-                            <tr>
-                                <td>{{ statItem.date }}</td>
-                                <td>{{ statItem.pricediff }}</td>
-                                <td>{{ statItem.timediff }} Min.</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
 
-                    <table class="table table-bordered table-striped">
-                        <tr>
-                            <th>von</th>
-                            <th>bis</th>
-                            <th>Preis</th>
-                        </tr>
-                        {% for priceItem in mylists['prices'] %}
-                            <tr>
-                                <td>{{ priceItem.ts1 }}</td>
-                                <td>{{ priceItem.ts2 }}</td>
-                                <td>{{ priceItem.price }} &euro;</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-stationdata" role="tabpanel" aria-labelledby="nav-stationdata-tab">
+                {% include 'pages/station/openingtimes.html.twig' %}
+            </div>
+            <div class="tab-pane fade show" id="nav-timegraph" role="tabpanel" aria-labelledby="nav-timegraph-tab">
+                {% include 'pages/station/timegraph.html.twig' %}
+            </div>
+            {% for fuelType,mylists in lists %}
+                <div class="tab-pane fade show" id="nav-{{ fuelType }}" role="tabpanel" aria-labelledby="nav-{{ fuelType }}-tab">
+                    <div class="row mt-4">
+                        <div class="col-sm">
+
+                            <h3>Tiefpreisphasen</h3>
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>durchschn. Erh&ouml;hung</th>
+                                    <th>durchschn. Haltezeit Tiefpreis</th>
+                                </tr>
+                                {% for statItem in mylists['stat'] %}
+                                    <tr>
+                                        <td>{{ statItem.date }}</td>
+                                        <td>{{ statItem.pricediff }}</td>
+                                        <td>{{ statItem.timediff }} Min.</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+
+                            <h3>Preise der letzten 24 Stunden</h3>
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <th>von</th>
+                                    <th>bis</th>
+                                    <th>Preis</th>
+                                </tr>
+                                {% for priceItem in mylists['prices'] %}
+                                    <tr>
+                                        <td>{{ priceItem.ts1 }}</td>
+                                        <td>{{ priceItem.ts2 }}</td>
+                                        <td>{{ priceItem.price }} &euro;</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         </div>

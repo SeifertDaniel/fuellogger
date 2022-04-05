@@ -67,7 +67,8 @@ a {
     margin-bottom: 60px;
 }
 
-#content a {
+#content a,
+.nav-pills .nav-link {
     color: #604706;
     text-decoration: none;
 }
@@ -83,4 +84,9 @@ a:hover {
 
 body.disclaimer .container {
     background-color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: goldenrod;
 }
