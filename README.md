@@ -1,3 +1,5 @@
+Dashboard und Preisbenachrichtigungen anhand der Benzinpreisinformationen von https://creativecommons.tankerkoenig.de/
+
 ## Installation
 
 ```
@@ -6,7 +8,7 @@
 
 ## importieren von Bestandsdaten
 
-Tankerkönig stellt in der Hitorie unter https://creativecommons.tankerkoenig.de/ Bestandsdaten zur Verfügung. Diese können importiert werden. Lege dazu eine Importtabelle an:
+Tankerkönig stellt in der Historie unter https://creativecommons.tankerkoenig.de/ Bestandsdaten zur Verfügung. Diese können importiert werden. Lege dazu eine Importtabelle an:
 
 ```
 CREATE TABLE `import` (
