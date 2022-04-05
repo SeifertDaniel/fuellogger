@@ -4,7 +4,7 @@ namespace Daniels\FuelLogger\Application\Model;
 
 use Ramsey\Uuid\Uuid;
 
-class Station
+class Station extends BaseModel
 {
     public function exists()
     {}
