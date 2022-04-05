@@ -51,7 +51,7 @@ class DailyBestPriceFilter extends AbstractQueryFilter
             ->orderBy('pr.price', 'ASC')
             ->setMaxResults(1);
 
-        return (float) $qb->fetchOne();
+        return (float) $qb->fetchOne() ?: 10.0;
     }
 
     /**
