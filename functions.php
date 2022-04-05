@@ -33,3 +33,19 @@ if (!function_exists('stopProfile')) {
         $aProfileTimes[$sProfileName] += microtime(true) - $aStartTimes[$sProfileName];
     }
 }
+
+if (!function_exists('dumpVar')) {
+    function dumpVar($mVar, $blToFile = false)
+    {
+        if ($blToFile) {
+            $out = var_export($mVar, true);
+            $f = fopen($_ENV['ROOTDIR'] . "tmp/vardump.txt", "a");
+            fwrite($f, $out);
+            fclose($f);
+        } else {
+            echo '<pre>';
+            var_export($mVar);
+            echo '</pre>';
+        }
+    }
+}
