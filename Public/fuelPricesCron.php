@@ -3,9 +3,11 @@
 namespace Daniels\FuelLogger\PublicDir;
 
 use Daniels\FuelLogger\Application\Model\BestPriceNotifier;
+use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\Fuel;
 use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Application\Model\Station;
+use Daniels\FuelLogger\Application\Model\StationList;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
 use DanielS\Tankerkoenig\ApiClient;
@@ -47,6 +49,21 @@ class fuelPricesCron extends Base
     {
         startProfile(__METHOD__);
 
+        $updatePrices = $this->addFromSurroundingSearch();
+
+        new BestPriceNotifier($updatePrices);
+
+        stopProfile(__METHOD__);
+    }
+
+    /**
+     * @return array
+     * @throws ApiException
+     * @throws DoctrineException
+     * @throws GuzzleException
+     */
+    public function addFromSurroundingSearch(): array
+    {
         $updatePrices = [];
         foreach (Fuel::getTypes() as $type) {
             $updatePrices[$type] = [];
@@ -56,7 +73,7 @@ class fuelPricesCron extends Base
             $station = new Station();
             $stationId = $station->getIdByTkId($stationTkId);
 
-            if (false == $stationId ) {
+            if (false == $stationId) {
                 $details = $this->getDetails($stationTkId);
                 $stationId = $station->insert(
                     $details->id,
@@ -87,10 +104,57 @@ class fuelPricesCron extends Base
                 }
             }
         }
+        return $updatePrices;
+    }
 
-        new BestPriceNotifier($updatePrices);
+    /**
+     * @return array
+     * @throws ApiException
+     * @throws DoctrineException
+     * @throws GuzzleException
+     */
+    public function addFromStationList(): array
+    {
+        $updatePrices = [];
+        foreach (Fuel::getTypes() as $type) {
+            $updatePrices[$type] = [];
+        }
 
-        stopProfile(__METHOD__);
+        foreach ($this->api->prices($this->getStationIds()) as $priceInfo) {
+            foreach (Fuel::getTypes() as $type) {
+                $price = new Price();
+                if ($priceInfo[$type] && $price->getLastPrice($priceInfo['stationId'], $type) != $priceInfo[$type]) {
+                    $price->insert(
+                        $priceInfo['stationId'],
+                        $type,
+                        $priceInfo[$type]
+                    );
+
+                    $updatePrices[$type][] = $priceInfo[$type];
+                }
+            }
+
+        }
+
+        return $updatePrices;
+    }
+
+    /**
+     * @return array
+     * @throws DoctrineException
+     */
+    public function getStationIds(): array
+    {
+        $qb = DBConnection::getConnection()->createQueryBuilder();
+        $qb->select('st.id', 'st.tkid')
+            ->from((new Station())->getCoreTableName(), 'st')
+            ->where('1')
+            ->setMaxResults(8);
+
+        $list = new StationList();
+        $list->selectString($qb->getSQL(), $qb->getParameters());
+
+        return $list->getTKStationIds();
     }
 
     /**
