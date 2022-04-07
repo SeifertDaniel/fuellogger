@@ -65,13 +65,16 @@ class BestPrice
 
     /**
      * @param string $type
-     *
+     * @param array $filter
      * @return QueryBuilder
      * @throws Exception
      */
-    public function getTimeDiffSortedQueryBuilder(string $type = Fuel::TYPE_E10): QueryBuilder
+    public function getTimeDiffSortedQueryBuilder(string $type = Fuel::TYPE_E10, array $filter = []): QueryBuilder
     {
         $qb = $this->getQueryBuilder($type);
+        foreach ($filter as $field => $value) {
+            if ($value) $qb->andWhere($qb->expr()->eq($field, $value));
+        }
         $qb->addOrderBy('timediff', 'DESC');
 
         return $qb;

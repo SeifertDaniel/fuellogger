@@ -36,9 +36,16 @@ class bestPriceList implements controllerInterface
     {
         startProfile(__METHOD__);
 
+        $postCodeFilter = Registry::getRequest()->getRequestEscapedParameter('postcode');
+
+        $filter = [
+            'st.postCode' => $postCodeFilter
+        ];
+        Registry::getTwig()->addGlobal('postCodeFilter', $postCodeFilter);
+
         $fuelPrices = [];
         foreach (Fuel::getTypes() as $type) {
-            $qb = (new BestPrice())->getTimeDiffSortedQueryBuilder($type);
+            $qb = (new BestPrice())->getTimeDiffSortedQueryBuilder($type, $filter);
             $fuelPrices[$type] = $qb->fetchAllAssociative();
         }
 

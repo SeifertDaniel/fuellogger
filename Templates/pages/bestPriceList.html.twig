@@ -4,11 +4,34 @@
 
 {% block content %}
     <div class="container">
-        <h2>Preis&uuml;bersicht</h2>
+        <div class="row">
+            <h2 class="col-4 col-sm-6">Preis&uuml;bersicht</h2>
+
+            <ul class="col-8 col-sm-6 nav nav-pills justify-content-end">
+                <li class="nav-item">
+                    <a class="nav-link {% if postCodeFilter == '' %}active{% endif %}" href="index.php">alle</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if postCodeFilter == '09366' %}active{% endif %}" href="index.php?postcode=09366">Stollberg</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if postCodeFilter == '09380' %}active{% endif %}" href="index.php?postcode=09380">Thalheim</a>
+                </li>
+            </ul>
+        </div>
+
+        <ul class="nav d-lg-none">
+            {% for fuelType,priceList in fuelPrices %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#{{ fuelType }}">{{ fuelType|capitalize }} &darr;</a>
+                </li>
+            {% endfor %}
+        </ul>
 
         <div class="row">
             {% for fuelType,priceList in fuelPrices %}
                 <div class="col-sm">
+                    <a id="{{ fuelType }}"></a>
                     <h3>{{ fuelType|capitalize }}</h3>
 
                     <table class="table table-bordered table-striped">
