@@ -29,7 +29,7 @@
     ],
     "bin": [
         "bin/fuelPricesCron",
-        "bin/oilPricesCron",
+        "bin/maintenanceCron",
         "bin/clearTmp"
     ]
 }
