@@ -22,6 +22,7 @@ $dotenv->required([
     'TKAPIKEY',
     'LOCATIONLAT',
     'LOCATIONLNG',
+    'RADIUS',
     'COMMODITIESAPIKEY'
 ])->notEmpty();
 

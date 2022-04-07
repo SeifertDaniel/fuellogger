@@ -168,7 +168,7 @@ class fuelPricesCron extends Base
             $_ENV['LOCATIONLAT'],
             $_ENV['LOCATIONLNG'],
             ApiClient::TYPE_ALL,
-            4,
+            $_ENV['RADIUS'],
             ApiClient::SORT_DIST
         );
     }
