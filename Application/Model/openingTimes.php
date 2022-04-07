@@ -16,6 +16,7 @@ class openingTimes
     const WDAY_FRI = 5;  // 16
     const WDAY_SAT = 6;  // 32
     const WDAY_SUN = 7;  // 64
+    const WDAY_FEA = 8;  // 128
 
     protected string $stationId;
 
@@ -46,7 +47,8 @@ class openingTimes
             self::WDAY_THU  => 'Donnerstag',
             self::WDAY_FRI  => 'Freitag',
             self::WDAY_SAT  => 'Samstag',
-            self::WDAY_SUN  => 'Sonntag'
+            self::WDAY_SUN  => 'Sonntag',
+            self::WDAY_FEA  => 'Feiertag'
         ];
     }
 
