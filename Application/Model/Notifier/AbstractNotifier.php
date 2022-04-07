@@ -4,6 +4,8 @@ namespace Daniels\FuelLogger\Application\Model\Notifier;
 
 use Daniels\FuelLogger\Application\Model\NotifyFilters\AbstractFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\emptyUpdatesListException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 
 abstract class AbstractNotifier implements NotifierInterface
 {
@@ -26,6 +28,24 @@ abstract class AbstractNotifier implements NotifierInterface
     public function getFilters(): array
     {
         return $this->filters;
+    }
+
+    /**
+     * @param UpdatesList $priceUpdates
+     * @return UpdatesList
+     * @throws emptyUpdatesListException
+     */
+    public function getFilteredUpdates(UpdatesList $priceUpdates) : UpdatesList
+    {
+        foreach ($this->getFilters() as $filter) {
+            $priceUpdates = $filter->filterPriceUpdates($priceUpdates);
+        }
+
+        if (! (bool) $priceUpdates->count()) {
+            throw new emptyUpdatesListException();
+        }
+
+        return $priceUpdates;
     }
 
     /**

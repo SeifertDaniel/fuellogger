@@ -2,13 +2,16 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
+
 abstract class AbstractFilter
 {
     protected bool $isInverted = false;
 
     protected string $debugMessage = 'no debug message set';
 
-    abstract public function canNotifiy(string $fuelType, float $price): bool;
+    abstract public function filterItem(UpdatesItem $item): bool;
 
     /**
      * @return $this
@@ -47,5 +50,19 @@ abstract class AbstractFilter
     public function getDebugMessage(): string
     {
         return $this->debugMessage;
+    }
+
+    public function filterPriceUpdates(UpdatesList $priceUpdates): UpdatesList
+    {
+        /** @var UpdatesItem $priceUpdate */
+        foreach ($priceUpdates->getList() as $id => $priceUpdate) {
+            $filtered = $this->filterItem($priceUpdate);
+            $filtered = $this->isInverted ? !$filtered : $filtered;
+            if ($filtered) {
+                $priceUpdates->remove($id);
+            }
+        }
+
+        return $priceUpdates;
     }
 }

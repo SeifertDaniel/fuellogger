@@ -3,16 +3,14 @@
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
 use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 
 interface NotifierInterface
 {
     /**
-     * @param string $fuelType
-     * @param float  $price
-     * @param string $stations
-     *
-     * @throws filterPreventsNotificationException
+     * @param UpdatesList $priceUpdates
      * @return bool
+     * @throws filterPreventsNotificationException
      */
-    public function notify(string $fuelType, float $price, string $stations) : bool;
+    public function notify(UpdatesList $priceUpdates) : bool;
 }

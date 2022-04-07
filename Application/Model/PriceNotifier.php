@@ -5,24 +5,26 @@ namespace Daniels\FuelLogger\Application\Model;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierInterface;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierList;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\emptyUpdatesListException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 
-class BestPriceNotifier
+class PriceNotifier
 {
-    protected array $updatePrices = [];
+    protected UpdatesList $updatePrices;
 
     /**
-     * @param array $updatePrices
+     * @param UpdatesList $updatePrices
      * @throws Exception
      */
-    public function __construct(array $updatePrices)
+    public function __construct(UpdatesList $updatePrices)
     {
         startProfile(__METHOD__);
 
         $this->updatePrices = $updatePrices;
 
-        $this->shouldNotify();
+        $this->notify();
 
         stopProfile(__METHOD__);
     }
@@ -79,22 +81,19 @@ class BestPriceNotifier
     }
 
     /**
-     * @param $bestPrice
-     * @param string $type
      * @return void
-     * @throws Exception
      */
-    protected function notify($bestPrice, string $type = Fuel::TYPE_E10)
+    protected function notify()
     {
         startProfile(__METHOD__);
 
-        $stationList = $this->getCheapestStationList($type);
+        //$stationList = $this->getCheapestStationList($type);
 
         /** @var NotifierInterface $notifier */
         foreach((new NotifierList())->getList() as $notifier) {
             try {
-                $notifier->notify( $type, $bestPrice, $stationList );
-            } catch (filterPreventsNotificationException $e) {
+                $notifier->notify( clone $this->updatePrices );
+            } catch (filterPreventsNotificationException|emptyUpdatesListException $e) {
                 Registry::getLogger()->debug($e->getMessage());
             }
         }

@@ -2,10 +2,11 @@
 
 namespace Daniels\FuelLogger\PublicDir;
 
-use Daniels\FuelLogger\Application\Model\BestPriceNotifier;
 use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\Fuel;
 use Daniels\FuelLogger\Application\Model\Price;
+use Daniels\FuelLogger\Application\Model\PriceNotifier;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Application\Model\StationList;
 use Daniels\FuelLogger\Core\Base;
@@ -51,26 +52,24 @@ class fuelPricesCron extends Base
 
         $updatePrices = $this->addFromSurroundingSearch();
 
-        new BestPriceNotifier($updatePrices);
+        new PriceNotifier($updatePrices);
 
         stopProfile(__METHOD__);
     }
 
     /**
-     * @return array
+     * @return UpdatesList
      * @throws ApiException
      * @throws DoctrineException
      * @throws GuzzleException
      */
-    public function addFromSurroundingSearch(): array
+    public function addFromSurroundingSearch(): UpdatesList
     {
-        $updatePrices = [];
-        foreach (Fuel::getTypes() as $type) {
-            $updatePrices[$type] = [];
-        }
+        $updates = new UpdatesList();
 
         foreach ($this->getStations() as $stationTkId => $stationData) {
             $station = new Station();
+
             $stationId = $station->getIdByTkId($stationTkId);
 
             if (false == $stationId) {
@@ -94,17 +93,17 @@ class fuelPricesCron extends Base
 
             foreach (Fuel::getTypes() as $type) {
                 if ($price->getLastPrice($stationId, $type) != $stationData[$type]) {
+
                     $price->insert(
                         $stationId,
                         $type,
                         $stationData[$type]
                     );
-
-                    $updatePrices[$type][] = $stationData[$type];
+                    $updates->add($stationId, $stationData['postCode'], $stationData['brand'], $type, $stationData[$type]);
                 }
             }
         }
-        return $updatePrices;
+        return $updates;
     }
 
     /**

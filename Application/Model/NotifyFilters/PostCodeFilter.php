@@ -5,16 +5,16 @@ namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 
-class FuelTypeFilter extends AbstractFilter
+class PostCodeFilter extends AbstractFilter
 {
-    protected array $fuelTypes = [];
+    protected array $postCodes = [];
 
     /**
-     * @param array $fuelTypes
+     * @param array $postCodes
      */
-    public function __construct(array $fuelTypes)
+    public function __construct(array $postCodes)
     {
-        $this->fuelTypes = $fuelTypes;
+        $this->postCodes = $postCodes;
     }
 
     /**
@@ -23,11 +23,11 @@ class FuelTypeFilter extends AbstractFilter
      */
     public function filterItem(UpdatesItem $item): bool
     {
-        $doFilter = !in_array($item->getFuelType(), $this->fuelTypes);
+        $doFilter = !in_array($item->getStationPostCode(), $this->postCodes);
 
         if ($doFilter) {
             Registry::getLogger()->debug(get_class($this));
-            Registry::getLogger()->debug("fuelTypes ".implode(', ', $this->fuelTypes)." do not match ".$item->getFuelType());
+            Registry::getLogger()->debug("Post codes ".implode(', ', $this->postCodes)." do not match ".$item->getStationPostCode());
         }
 
         return $doFilter;
