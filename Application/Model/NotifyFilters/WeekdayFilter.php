@@ -2,9 +2,11 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
+use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 
-class WeekdayFilter extends AbstractFilter
+class WeekdayFilter extends AbstractFilter implements GlobalFilter
 {
     const MONDAY = 1;
     const TUESDAY = 2;
@@ -25,20 +27,19 @@ class WeekdayFilter extends AbstractFilter
     }
 
     /**
-     * @param string $fuelType
-     * @param float $price
-     *
+     * @param UpdatesItem $item
      * @return bool
      */
-    public function canNotifiy(string $fuelType, float $price) : bool
+    public function filterItem(UpdatesItem $item): bool
     {
         $currentWeekDay = (new DateTime())->format('N');
         $canNotify = in_array($currentWeekDay, $this->weekdays);
 
         if (false === $canNotify) {
-            $this->setDebugMessage("Weekdays ".implode(', ', $this->weekdays)." do not match $currentWeekDay");
+            Registry::getLogger()->debug(get_class($this));
+            Registry::getLogger()->debug("Weekdays ".implode(', ', $this->weekdays)." do not match $currentWeekDay");
         }
 
-        return $canNotify;
+        return !$canNotify;
     }
 }

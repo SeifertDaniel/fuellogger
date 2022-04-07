@@ -2,10 +2,12 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Exception as DoctrineException;
 
-class FuelTypeFilter extends AbstractFilter
+class FuelTypeFilter extends AbstractFilter implements DatabaseQueryFilter
 {
     protected array $fuelTypes = [];
 
@@ -31,5 +33,16 @@ class FuelTypeFilter extends AbstractFilter
         }
 
         return $doFilter;
+    }
+
+    /**
+     * @param string $priceTableAlias
+     * @return string
+     * @throws DoctrineException
+     */
+    public function getFilterQuery(string $priceTableAlias): string
+    {
+        $connection = DBConnection::getConnection();
+        return $priceTableAlias.'.type IN ('.implode(', ', array_map([$connection, 'quote'], $this->fuelTypes)).')';
     }
 }

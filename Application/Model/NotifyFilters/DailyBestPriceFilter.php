@@ -4,27 +4,28 @@ namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\Price;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
+use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 
 class DailyBestPriceFilter extends AbstractQueryFilter
 {
     /**
-     * @param string $fuelType
-     * @param float $price
-     *
+     * @param UpdatesItem $item
      * @return bool
      * @throws Exception
      */
-    public function canNotifiy( string $fuelType, float $price ): bool
+    public function filterItem(UpdatesItem $item): bool
     {
-        $bestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate($fuelType);
-        $canNotify = $price < $bestPriceBeforeUpdate;
+        $bestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate($item->getFuelType());
+        $canNotify = $item->getFuelPrice() < $bestPriceBeforeUpdate;
 
         if (false === $canNotify) {
-            $this->setDebugMessage("price $price is not lower than $bestPriceBeforeUpdate");
+            Registry::getLogger()->debug(get_class($this));
+            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not lower than $bestPriceBeforeUpdate");
         }
 
-        return $canNotify;
+        return !$canNotify;
     }
 
     /**
@@ -59,12 +60,13 @@ class DailyBestPriceFilter extends AbstractQueryFilter
      */
     public function getFilterQuery(): string
     {
-        return count($this->getQueryFilters()) ?
+        return count($this->getNotifier()->getQueryFilters()) ?
             implode(' AND ', array_map(
                 function (DatabaseQueryFilter $filter) {
-                    return $filter->getFilterQuery('pr.datetime');
+
+                    return $filter->getFilterQuery('pr');
                 },
-                $this->getQueryFilters()
+                $this->getNotifier()->getQueryFilters()
             )) :
             '1';
     }

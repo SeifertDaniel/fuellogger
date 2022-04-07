@@ -2,9 +2,11 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
+use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 
-class DateFilter extends AbstractFilter
+class DateFilter extends AbstractFilter implements GlobalFilter
 {
     public string $from;
     public string $till;
@@ -19,13 +21,7 @@ class DateFilter extends AbstractFilter
         $this->till = $till;
     }
 
-    /**
-     * @param string $fuelType
-     * @param float $price
-     *
-     * @return bool
-     */
-    public function canNotifiy(string $fuelType, float $price) : bool
+    public function filterItem(UpdatesItem $item): bool
     {
         $f = DateTime::createFromFormat('!Y-m-d', $this->from);
         $t = DateTime::createFromFormat('!Y-m-d', $this->till);
@@ -34,12 +30,13 @@ class DateFilter extends AbstractFilter
         $canNotify = $f <= $i && $i <= $t;
 
         if (false === $canNotify) {
-            $this->setDebugMessage(
+            Registry::getLogger()->debug(get_class($this));
+            Registry::getLogger()->debug(
                 "Date ".$i->format('Y-m-d')." is not between ".
                 $f->format('Y-m-d')." and ".$t->format('Y-m-d')
             );
         }
 
-        return $canNotify;
+        return !$canNotify;
     }
 }

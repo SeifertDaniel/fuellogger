@@ -37,4 +37,9 @@ class UpdatesList
     {
         return count($this->array);
     }
+
+    public function clear()
+    {
+        $this->array = [];
+    }
 }

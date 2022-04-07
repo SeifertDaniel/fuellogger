@@ -3,10 +3,12 @@
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
+use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 use Doctrine\DBAL\Exception;
 
-class TimeFilter extends AbstractFilter implements DatabaseQueryFilter
+class TimeFilter extends AbstractFilter implements DatabaseQueryFilter, GlobalFilter
 {
     public string $from;
     public string $till;
@@ -21,13 +23,7 @@ class TimeFilter extends AbstractFilter implements DatabaseQueryFilter
         $this->till = $till;
     }
 
-    /**
-     * @param string $fuelType
-     * @param float $price
-     *
-     * @return bool
-     */
-    public function canNotifiy(string $fuelType, float $price) : bool
+    public function filterItem(UpdatesItem $item): bool
     {
         $f = DateTime::createFromFormat('!H:i:s', $this->from);
         $t = DateTime::createFromFormat('!H:i:s', $this->till);
@@ -36,23 +32,22 @@ class TimeFilter extends AbstractFilter implements DatabaseQueryFilter
         $canNotify = ($f <= $i && $i <= $t) || ($f <= $i->modify('+1 day') && $i <= $t);
 
         if (false === $canNotify) {
-            $this->setDebugMessage(
-                "Time ".$i->format('H:i:s')." is not between ".
-                $f->format('H:i:s')." and ".$t->format('H:i:s')
-            );
+            Registry::getLogger()->debug(get_class($this));
+            Registry::getLogger()->debug("Time ".$i->format('H:i:s')." is not between ".
+                $f->format('H:i:s')." and ".$t->format('H:i:s'));
         }
 
-        return $canNotify;
+        return !$canNotify;
     }
 
     /**
-     * @param string $fieldName
+     * @param string $priceTableAlias
      * @return string
      * @throws Exception
      */
-    public function getFilterQuery(string $fieldName): string
+    public function getFilterQuery(string $priceTableAlias): string
     {
         $connection = DBConnection::getConnection();
-        return 'DATE_FORMAT(pr.datetime, "%H:%i:%s") BETWEEN '.$connection->quote($this->from).' AND '.$connection->quote($this->till);
+        return 'DATE_FORMAT('.$priceTableAlias.'.datetime, "%H:%i:%s") BETWEEN '.$connection->quote($this->from).' AND '.$connection->quote($this->till);
     }
 }

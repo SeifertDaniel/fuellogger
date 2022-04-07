@@ -20,8 +20,11 @@ class NotifierList
     {
         return [
             (new DebugNotifier())
-                ->addFilter(new PostCodeFilter(['09380']))
-                ->addFilter(new FuelTypeFilter([Fuel::TYPE_E10]))
+                ->addFilter(new DailyBestPriceFilter())
+                ->addFilter(new TimeFilter('09:00:00', '22:59:00'))
+                ->addFilter(new FuelTypeFilter([Fuel::TYPE_E10, Fuel::TYPE_E5]))
+                //->addFilter(new PostCodeFilter(['09380']))
+                //->addFilter(new FuelTypeFilter([Fuel::TYPE_E10]))
             //,
             //(new Ifttt($_ENV['C001_IFTTT_URL']))
             /*,

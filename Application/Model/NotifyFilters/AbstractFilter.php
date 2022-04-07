@@ -2,6 +2,7 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\Notifier\AbstractNotifier;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 
@@ -12,6 +13,8 @@ abstract class AbstractFilter
     protected string $debugMessage = 'no debug message set';
 
     abstract public function filterItem(UpdatesItem $item): bool;
+
+    protected AbstractNotifier $notifier;
 
     /**
      * @return $this
@@ -54,15 +57,39 @@ abstract class AbstractFilter
 
     public function filterPriceUpdates(UpdatesList $priceUpdates): UpdatesList
     {
-        /** @var UpdatesItem $priceUpdate */
-        foreach ($priceUpdates->getList() as $id => $priceUpdate) {
-            $filtered = $this->filterItem($priceUpdate);
+        if ($this instanceof GlobalFilter) {
+            $filtered = $this->filterItem(new UpdatesItem());
             $filtered = $this->isInverted ? !$filtered : $filtered;
             if ($filtered) {
-                $priceUpdates->remove($id);
+                $priceUpdates->clear();
+            }
+        } else {
+            /** @var UpdatesItem $priceUpdate */
+            foreach ($priceUpdates->getList() as $id => $priceUpdate) {
+                $filtered = $this->filterItem($priceUpdate);
+                $filtered = $this->isInverted ? !$filtered : $filtered;
+                if ($filtered) {
+                    $priceUpdates->remove($id);
+                }
             }
         }
 
         return $priceUpdates;
+    }
+
+    /**
+     * @return AbstractNotifier
+     */
+    public function getNotifier(): AbstractNotifier
+    {
+        return $this->notifier;
+    }
+
+    /**
+     * @param AbstractNotifier $notifier
+     */
+    public function setNotifier(AbstractNotifier $notifier): void
+    {
+        $this->notifier = $notifier;
     }
 }

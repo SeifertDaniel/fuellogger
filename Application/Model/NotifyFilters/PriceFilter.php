@@ -2,6 +2,9 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
+use Daniels\FuelLogger\Core\Registry;
+
 class PriceFilter extends AbstractFilter
 {
     public float $from;
@@ -17,20 +20,15 @@ class PriceFilter extends AbstractFilter
         $this->till = $till;
     }
 
-    /**
-     * @param string $fuelType
-     * @param float $price
-     *
-     * @return bool
-     */
-    public function canNotifiy(string $fuelType, float $price): bool
+    public function filterItem(UpdatesItem $item): bool
     {
-        $canNotify = $this->from <= $price && $price <= $this->till;
+        $canNotify = $this->from <= $item->getFuelPrice() && $item->getFuelType() <= $this->till;
 
         if (false === $canNotify) {
-            $this->setDebugMessage("price $price is not between $this->from and $this->till");
+            Registry::getLogger()->debug(get_class($this));
+            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not between $this->from and $this->till");
         }
 
-        return $canNotify;
+        return !$canNotify;
     }
 }
