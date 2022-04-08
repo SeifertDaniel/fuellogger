@@ -2,36 +2,95 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\ItemFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 
-class PriceFilter extends AbstractFilter implements ItemFilter, MediumEfficencyFilter
+class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFilter, MediumEfficencyFilter
 {
-    public float $from;
-    public float $till;
+    const LOWERTHAN = '<';
+    const LOWERTHANEQUALS = '<=';
+    const EQUALS = '=';
+    const NOTEQUALS = '<>';
+    const HIGHERTHANEQUALS = '>=';
+    const HIGHERTHAN = '>';
+
+    public string $operator;
+    public float $price;
 
     /**
-     * @param float $from
-     * @param float $till
+     * @param string $operator
+     * @param float  $price
      */
-    public function __construct(float $from, float $till)
+    public function __construct(string $operator, float $price)
     {
-        $this->from = $from;
-        $this->till = $till;
+        $this->operator = $operator;
+        $this->price    = $price;
     }
 
+    /**
+     * @param UpdatesItem $item
+     *
+     * @return bool
+     * @throws filterPreventsNotificationException
+     */
     public function filterItem(UpdatesItem $item): bool
     {
-        $canNotify = $this->from <= $item->getFuelPrice() && $item->getFuelType() <= $this->till;
+        $doFilter = !version_compare((float) $item->getFuelPrice(), $this->price, $this->checkIsValid($this->operator));
 
-        if (false === $canNotify) {
+        if ($doFilter) {
+            $message = "price ".$item->getFuelPrice()." is ".$this->operator." ". $this->price;
             Registry::getLogger()->debug(get_class($this));
-            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not between $this->from and $this->till");
+            Registry::getLogger()->debug($message);
+            $this->setDebugMessage($message);
         }
 
-        return !$canNotify;
+        return $doFilter;
+    }
+
+    /**
+     * @param string $priceTableAlias
+     * @param string $stationTableAlias
+     *
+     * @return string
+     * @throws Exception
+     * @throws filterPreventsNotificationException
+     */
+    public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
+    {
+        $connection = DBConnection::getConnection();
+        return $priceTableAlias.'.price '.$this->checkIsValid($this->operator).' '.$connection->quote($this->price);
+    }
+
+    /**
+     * @param $operator
+     *
+     * @throws filterPreventsNotificationException
+     */
+    public function checkIsValid($operator)
+    {
+        if (!in_array(
+            $operator,
+            [
+                self::LOWERTHAN,
+                self::LOWERTHANEQUALS,
+                self::EQUALS,
+                self::NOTEQUALS,
+                self::HIGHERTHANEQUALS,
+                self::HIGHERTHAN
+            ]
+        )) {
+            $this->setDebugMessage('invalid price comparison operator '.$this->operator);
+            throw new filterPreventsNotificationException($this);
+        }
+
+        return $operator;
     }
 }

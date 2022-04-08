@@ -32,23 +32,27 @@ class TimeFilter extends AbstractFilter implements DatabaseQueryFilter, HighEffi
         $t = DateTime::createFromFormat('!H:i:s', $this->till);
         $i = (new DateTime())->setDate($f->format('Y'),$f->format('m'), $f->format('d'));
         if ($f > $t) $t->modify('+1 day');
-        $canNotify = ($f <= $i && $i <= $t) || ($f <= $i->modify('+1 day') && $i <= $t);
+        $doFilter = !($f <= $i && $i <= $t) || ($f <= $i->modify('+1 day') && $i <= $t);
 
-        if (false === $canNotify) {
+        if ($doFilter) {
+            $message = "Time ".$i->format('H:i:s')." is not between ".
+                       $f->format('H:i:s')." and ".$t->format('H:i:s');
             Registry::getLogger()->debug(get_class($this));
-            Registry::getLogger()->debug("Time ".$i->format('H:i:s')." is not between ".
-                $f->format('H:i:s')." and ".$t->format('H:i:s'));
+            Registry::getLogger()->debug($message);
+            $this->setDebugMessage($message);
         }
 
-        return !$canNotify;
+        return $doFilter;
     }
 
     /**
      * @param string $priceTableAlias
+     * @param string $stationTableAlias
+     *
      * @return string
      * @throws Exception
      */
-    public function getFilterQuery(string $priceTableAlias): string
+    public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
     {
         $connection = DBConnection::getConnection();
         return 'DATE_FORMAT('.$priceTableAlias.'.datetime, "%H:%i:%s") BETWEEN '.$connection->quote($this->from).' AND '.$connection->quote($this->till);

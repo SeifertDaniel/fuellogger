@@ -68,7 +68,7 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
             implode(' AND ', array_map(
                 function (DatabaseQueryFilter $filter) {
 
-                    return $filter->getFilterQuery('pr');
+                    return $filter->getFilterQuery('pr', 'st');
                 },
                 $this->getNotifier()->getQueryFilters()
             )) :

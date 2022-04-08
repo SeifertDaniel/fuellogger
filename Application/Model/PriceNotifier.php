@@ -2,9 +2,9 @@
 
 namespace Daniels\FuelLogger\Application\Model;
 
+use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierInterface;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierList;
-use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
@@ -67,7 +67,7 @@ class PriceNotifier
      */
     protected function getLowestUpdatePrice(string $type = Fuel::TYPE_E10): mixed
     {
-        return count($this->updatePrices) && is_array($this->updatePrices[$type]) && count($this->updatePrices[$type]) ?
+        return $this->updatePrices->count() && is_array($this->updatePrices[$type]) && count($this->updatePrices[$type]) ?
             min(
                 array_filter(
                     $this->updatePrices[$type],

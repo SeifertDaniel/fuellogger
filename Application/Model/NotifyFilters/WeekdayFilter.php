@@ -2,13 +2,16 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use DateTime;
+use Doctrine\DBAL\Exception;
 
-class WeekdayFilter extends AbstractFilter implements HighEfficencyFilter
+class WeekdayFilter extends AbstractFilter implements DatabaseQueryFilter, HighEfficencyFilter
 {
     const MONDAY = 1;
     const TUESDAY = 2;
@@ -35,13 +38,26 @@ class WeekdayFilter extends AbstractFilter implements HighEfficencyFilter
     public function filterItem(UpdatesItem $item): bool
     {
         $currentWeekDay = (new DateTime())->format('N');
-        $canNotify = in_array($currentWeekDay, $this->weekdays);
+        $doFilter = !in_array($currentWeekDay, $this->weekdays);
 
-        if (false === $canNotify) {
+        if ($doFilter) {
+            $message = "Weekdays ".implode(', ', $this->weekdays)." do not match $currentWeekDay";
             Registry::getLogger()->debug(get_class($this));
-            Registry::getLogger()->debug("Weekdays ".implode(', ', $this->weekdays)." do not match $currentWeekDay");
+            Registry::getLogger()->debug($message);
+            $this->setDebugMessage($message);
         }
 
-        return !$canNotify;
+        return $doFilter;
+    }
+
+    /**
+     * @param string $priceTableAlias
+     * @return string
+     * @throws Exception
+     */
+    public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
+    {
+        $connection = DBConnection::getConnection();
+        return 'WEEKDAY('.$priceTableAlias.'.datetime) + 1 IN ('.implode(', ', array_map([$connection, 'quote'], $this->weekdays)).')';
     }
 }

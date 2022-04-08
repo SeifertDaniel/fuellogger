@@ -11,16 +11,16 @@ use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception as DoctrineException;
 
-class FuelTypeFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFilter, MediumEfficencyFilter
+class StationIdFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFilter, MediumEfficencyFilter
 {
-    protected array $fuelTypes = [];
+    protected array $stationIds = [];
 
     /**
-     * @param array $fuelTypes
+     * @param array $stationIds
      */
-    public function __construct(array $fuelTypes)
+    public function __construct(array $stationIds)
     {
-        $this->fuelTypes = $fuelTypes;
+        $this->stationIds = $stationIds;
     }
 
     /**
@@ -29,14 +29,17 @@ class FuelTypeFilter extends AbstractFilter implements ItemFilter, DatabaseQuery
      */
     public function filterItem(UpdatesItem $item): bool
     {
-        $doFilter = !in_array($item->getFuelType(), $this->fuelTypes);
+        $doFilter = !in_array($item->getStationId(), $this->stationIds);
 
         if ($doFilter) {
-            $message = "fuelTypes ".implode(', ', $this->fuelTypes)." do not match ".$item->getFuelType();
+            $message = "Stations ".implode(', ', $this->stationIds) . " do not match " . $item->getStationId();
             Registry::getLogger()->debug(get_class($this));
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        dumpvar(__METHOD__.__LINE__);
+        dumpvar($doFilter);
 
         return $doFilter;
     }
@@ -51,6 +54,6 @@ class FuelTypeFilter extends AbstractFilter implements ItemFilter, DatabaseQuery
     public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
     {
         $connection = DBConnection::getConnection();
-        return $priceTableAlias.'.type IN ('.implode(', ', array_map([$connection, 'quote'], $this->fuelTypes)).')';
+        return $stationTableAlias.'.id IN ('.implode(', ', array_map([$connection, 'quote'], $this->stationIds)) . ')';
     }
 }
