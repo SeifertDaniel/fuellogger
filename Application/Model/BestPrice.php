@@ -76,6 +76,7 @@ class BestPrice
             if ($value) $qb->andWhere($qb->expr()->eq($field, $value));
         }
         $qb->addOrderBy('timediff', 'DESC');
+        $qb->addOrderBy('st.id', 'DESC');
 
         return $qb;
     }
