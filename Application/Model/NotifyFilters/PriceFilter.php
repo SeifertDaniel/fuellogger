@@ -2,10 +2,13 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\ItemFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 
-class PriceFilter extends AbstractFilter
+class PriceFilter extends AbstractFilter implements ItemFilter, MediumEfficencyFilter
 {
     public float $from;
     public float $till;

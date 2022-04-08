@@ -3,12 +3,15 @@
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 use Doctrine\DBAL\Exception;
 
-class TimeFilter extends AbstractFilter implements DatabaseQueryFilter, GlobalFilter
+class TimeFilter extends AbstractFilter implements DatabaseQueryFilter, HighEfficencyFilter
 {
     public string $from;
     public string $till;

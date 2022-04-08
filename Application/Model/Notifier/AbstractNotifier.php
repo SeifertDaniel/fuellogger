@@ -2,15 +2,18 @@
 
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
-use Daniels\FuelLogger\Application\Model\NotifyFilters\AbstractFilter;
-use Daniels\FuelLogger\Application\Model\NotifyFilters\DatabaseQueryFilter;
-use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
-use Daniels\FuelLogger\Application\Model\PriceUpdates\emptyUpdatesListException;
+use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
+use Doctrine\DBAL\Exception;
 
 abstract class AbstractNotifier implements NotifierInterface
 {
     protected array $filters = [];
+    protected bool $filtersAreSorted = false;
 
     /**
      * @param AbstractFilter $filter
@@ -28,6 +31,10 @@ abstract class AbstractNotifier implements NotifierInterface
      */
     public function getFilters(): array
     {
+        if (!$this->filtersAreSorted) {
+            $this->sortFiltersByEfficency();
+        }
+
         return $this->filters;
     }
 
@@ -50,8 +57,10 @@ abstract class AbstractNotifier implements NotifierInterface
 
     /**
      * @param UpdatesList $priceUpdates
+     *
      * @return UpdatesList
-     * @throws emptyUpdatesListException
+     * @throws Exception
+     * @throws filterPreventsNotificationException
      */
     public function getFilteredUpdates(UpdatesList $priceUpdates) : UpdatesList
     {
@@ -61,24 +70,30 @@ abstract class AbstractNotifier implements NotifierInterface
             $priceUpdates = $filter->filterPriceUpdates($priceUpdates);
         }
 
-        if (! (bool) $priceUpdates->count()) {
-            throw new emptyUpdatesListException();
-        }
-
         return $priceUpdates;
     }
 
-    /**
-     * @param $fuelType
-     * @param float $price
-     * @throws filterPreventsNotificationException
-     */
-    public function checkForPassedFilters($fuelType, float $price)
+    public function sortFiltersByEfficency()
     {
-        foreach ($this->getFilters() as $filter) {
-            if (false === $filter->isNotifiable($fuelType, $price)) {
-                throw new filterPreventsNotificationException($filter);
+        $highEfficency = [];
+        $mediumEfficency = [];
+        $lowEfficency = [];
+
+        foreach ($this->filters as $filter) {
+            switch (true) {
+                case $filter instanceof HighEfficencyFilter:
+                    $highEfficency[] = $filter;
+                    break;
+                case $filter instanceof MediumEfficencyFilter:
+                    $mediumEfficency[] = $filter;
+                    break;
+                default:
+                    $lowEfficency[] = $filter;
             }
         }
+
+        $this->filters = array_merge($highEfficency, $mediumEfficency, $lowEfficency);
+
+        $this->filtersAreSorted = true;
     }
 }

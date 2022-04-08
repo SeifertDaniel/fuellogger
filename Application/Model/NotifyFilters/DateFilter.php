@@ -2,11 +2,13 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 
-class DateFilter extends AbstractFilter implements GlobalFilter
+class DateFilter extends AbstractFilter implements HighEfficencyFilter
 {
     public string $from;
     public string $till;

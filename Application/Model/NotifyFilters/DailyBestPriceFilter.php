@@ -3,12 +3,16 @@
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractQueryFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\ItemFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\LowEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 
-class DailyBestPriceFilter extends AbstractQueryFilter
+class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
 {
     /**
      * @param UpdatesItem $item

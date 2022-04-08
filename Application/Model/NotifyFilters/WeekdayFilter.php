@@ -2,11 +2,13 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 
-class WeekdayFilter extends AbstractFilter implements GlobalFilter
+class WeekdayFilter extends AbstractFilter implements HighEfficencyFilter
 {
     const MONDAY = 1;
     const TUESDAY = 2;

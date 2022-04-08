@@ -1,7 +1,8 @@
 <?php
 
-namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
+namespace Daniels\FuelLogger\Application\Model\Exceptions;
 
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
 use Exception;
 
 class filterPreventsNotificationException extends Exception

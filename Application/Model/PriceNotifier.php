@@ -5,7 +5,6 @@ namespace Daniels\FuelLogger\Application\Model;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierInterface;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierList;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
-use Daniels\FuelLogger\Application\Model\PriceUpdates\emptyUpdatesListException;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
@@ -93,7 +92,7 @@ class PriceNotifier
         foreach((new NotifierList())->getList() as $notifier) {
             try {
                 $notifier->notify( clone $this->updatePrices );
-            } catch (filterPreventsNotificationException|emptyUpdatesListException $e) {
+            } catch (filterPreventsNotificationException $e) {
                 Registry::getLogger()->debug($e->getMessage());
             }
         }

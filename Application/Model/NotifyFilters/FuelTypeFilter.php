@@ -3,11 +3,15 @@
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\ItemFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception as DoctrineException;
 
-class FuelTypeFilter extends AbstractFilter implements DatabaseQueryFilter
+class FuelTypeFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFilter, MediumEfficencyFilter
 {
     protected array $fuelTypes = [];
 

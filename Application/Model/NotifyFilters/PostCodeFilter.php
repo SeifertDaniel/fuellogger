@@ -2,10 +2,13 @@
 
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\ItemFilter;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 
-class PostCodeFilter extends AbstractFilter
+class PostCodeFilter extends AbstractFilter implements ItemFilter, MediumEfficencyFilter
 {
     protected array $postCodes = [];
 

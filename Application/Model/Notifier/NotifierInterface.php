@@ -2,7 +2,7 @@
 
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
-use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 
 interface NotifierInterface

@@ -1,7 +1,8 @@
 <?php
 
-namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
+namespace Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces;
 
+use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
 use Daniels\FuelLogger\Application\Model\Notifier\AbstractNotifier;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
@@ -27,19 +28,6 @@ abstract class AbstractFilter
     }
 
     /**
-     * @param string $fuelType
-     * @param float  $price
-     *
-     * @return bool
-     */
-    public function isNotifiable(string $fuelType, float $price) : bool
-    {
-        $canNotifiy = $this->canNotifiy($fuelType, $price);
-
-        return $this->isInverted ? !$canNotifiy : $canNotifiy;
-    }
-
-    /**
      * @param string $message
      */
     public function setDebugMessage(string $message)
@@ -55,15 +43,15 @@ abstract class AbstractFilter
         return $this->debugMessage;
     }
 
+    /**
+     * @param UpdatesList $priceUpdates
+     *
+     * @return UpdatesList
+     * @throws filterPreventsNotificationException
+     */
     public function filterPriceUpdates(UpdatesList $priceUpdates): UpdatesList
     {
-        if ($this instanceof GlobalFilter) {
-            $filtered = $this->filterItem(new UpdatesItem());
-            $filtered = $this->isInverted ? !$filtered : $filtered;
-            if ($filtered) {
-                $priceUpdates->clear();
-            }
-        } else {
+        if ($this instanceof ItemFilter) {
             /** @var UpdatesItem $priceUpdate */
             foreach ($priceUpdates->getList() as $id => $priceUpdate) {
                 $filtered = $this->filterItem($priceUpdate);
@@ -71,6 +59,15 @@ abstract class AbstractFilter
                 if ($filtered) {
                     $priceUpdates->remove($id);
                 }
+                if (! (bool) $priceUpdates->count()) {
+                    throw new filterPreventsNotificationException($this);
+                }
+            }
+        } else {
+            $filtered = $this->filterItem(new UpdatesItem());
+            $filtered = $this->isInverted ? !$filtered : $filtered;
+            if ($filtered) {
+                throw new filterPreventsNotificationException($this);
             }
         }
 

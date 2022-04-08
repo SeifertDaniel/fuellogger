@@ -2,8 +2,10 @@
 
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
-use Daniels\FuelLogger\Application\Model\NotifyFilters\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Exception as DoctrineException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use LogicException;
@@ -28,17 +30,16 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
     }
 
     /**
-     * @param string $fuelType
-     * @param float $price
-     * @param string $stations
+     * @param UpdatesList $priceUpdates
      *
      * @return bool
+     * @throws DoctrineException
      * @throws filterPreventsNotificationException
      */
-    public function notify(string $fuelType, float $price, string $stations) : bool
+    public function notify(UpdatesList $priceUpdates) : bool
     {
         try {
-            $this->checkForPassedFilters($fuelType, $price);
+            $priceUpdates = $this->getFilteredUpdates($priceUpdates);
 
             Registry::getLogger()->debug(get_class($this).' notifies');
             $message = 'Preis ' . ucfirst($fuelType) . ': ' . $price . ' ' . $stations;
