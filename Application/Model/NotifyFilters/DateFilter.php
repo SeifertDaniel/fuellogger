@@ -42,7 +42,6 @@ class DateFilter extends AbstractFilter implements DatabaseQueryFilter, HighEffi
             $this->setDebugMessage($message);
         }
 
-
         return $doFilter;
     }
 

@@ -38,9 +38,6 @@ class StationIdFilter extends AbstractFilter implements ItemFilter, DatabaseQuer
             $this->setDebugMessage($message);
         }
 
-        dumpvar(__METHOD__.__LINE__);
-        dumpvar($doFilter);
-
         return $doFilter;
     }
 

@@ -9,6 +9,7 @@ class UpdatesItem
     public string $stationBrand;
     public string $fuelType;
     public string $fuelPrice;
+    public string $stationName;
 
     /**
      * @return string
@@ -88,5 +89,21 @@ class UpdatesItem
     public function setFuelPrice(string $fuelPrice): void
     {
         $this->fuelPrice = $fuelPrice;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStationName(): string
+    {
+        return $this->stationName;
+    }
+
+    /**
+     * @param string $stationName
+     */
+    public function setStationName(string $stationName): void
+    {
+        $this->stationName = $stationName;
     }
 }

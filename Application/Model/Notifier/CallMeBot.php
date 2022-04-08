@@ -3,11 +3,13 @@
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
 use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception as DoctrineException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\TransferException;
 use LogicException;
 
 /**
@@ -42,7 +44,12 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
             $priceUpdates = $this->getFilteredUpdates($priceUpdates);
 
             Registry::getLogger()->debug(get_class($this).' notifies');
-            $message = 'Preis ' . ucfirst($fuelType) . ': ' . $price . ' ' . $stations;
+            $message = '';
+
+            /** @var UpdatesItem $item */
+            foreach ($priceUpdates->getList() as $item) {
+                $message .= 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . utf8_decode($item->getStationName()) . PHP_EOL;
+            }
 
             $url = 'https://api.callmebot.com/'.$this->endpoint.'?'.$this->getQuery($message);
 
@@ -53,7 +60,15 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
                 'timeout' => 60
             ]);
 
-            return $response->getStatusCode() == 200;
+            $errorMsg = strip_tags(stristr($response->getBody()->getContents(), 'Error: '));
+
+            if ($response->getStatusCode() != 200) {
+                throw new TransferException(get_class($this).' request returns '.$response->getStatusCode().' - '.$url);
+            } elseif ($errorMsg) {
+                throw new TransferException(get_class($this).' request returns '.$errorMsg.' - '.$url);
+            }
+
+            return true;
         } catch (GuzzleException $e) {
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());

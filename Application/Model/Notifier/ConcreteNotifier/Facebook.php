@@ -6,7 +6,7 @@ use Daniels\FuelLogger\Application\Model\Notifier\CallMeBot;
 
 class Facebook extends CallMeBot
 {
-    public string $endPoint = 'facebook/send.php';
+    public string $endpoint = 'facebook/send.php';
 
     /**
      * @param $message

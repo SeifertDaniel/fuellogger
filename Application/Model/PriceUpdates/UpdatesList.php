@@ -6,7 +6,7 @@ class UpdatesList
 {
     protected array $array = [];
 
-    public function add($stationId, $postCode, $brand, $type, $price)
+    public function add($stationId, $postCode, $brand, $type, $price, $station)
     {
         $itm = new UpdatesItem();
         $itm->setStationId($stationId);
@@ -14,6 +14,7 @@ class UpdatesList
         $itm->setStationBrand($brand);
         $itm->setFuelType($type);
         $itm->setFuelPrice($price);
+        $itm->setStationName($station);
         $this->array[] = $itm;
     }
 

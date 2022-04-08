@@ -6,7 +6,7 @@ use Daniels\FuelLogger\Application\Model\Notifier\CallMeBot;
 
 class Telegram extends CallMeBot
 {
-    public string $endPoint = 'telegram/send.php';
+    public string $endpoint = 'telegram/send.php';
 
     /**
      * @param $message

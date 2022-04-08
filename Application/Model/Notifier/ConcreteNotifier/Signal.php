@@ -6,7 +6,7 @@ use Daniels\FuelLogger\Application\Model\Notifier\CallMeBot;
 
 class Signal extends CallMeBot
 {
-    public string $endPoint = 'signal/send.php';
+    public string $endpoint = 'signal/send.php';
 
     /**
      * @param $message

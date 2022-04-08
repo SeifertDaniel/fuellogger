@@ -3,11 +3,13 @@
 namespace Daniels\FuelLogger\Application\Model\Notifier;
 
 use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception as DoctrineException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\TransferException;
 
 class WebHook extends AbstractNotifier implements NotifierInterface
 {
@@ -33,17 +35,25 @@ class WebHook extends AbstractNotifier implements NotifierInterface
         try {
             $priceUpdates = $this->getFilteredUpdates($priceUpdates);
 
-            $message = 'Preis ' . ucfirst($fuelType) . ': ' . $price . ' ' . $stations;
-            $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
+            /** @var UpdatesItem $item */
+            foreach ($priceUpdates->getList() as $item) {
+                Registry::getLogger()->debug(get_class($this).' notifies');
+                $message = 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . $item->getStationName();
+                $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
 
-            $client = new Client();
-            $response = $client->request(
-                'POST',
-                $this->url,
-                $this->getSubmittedOptions($message)
-            );
+                $client = new Client();
+                $response = $client->request(
+                    'POST',
+                    $this->url,
+                    $this->getSubmittedOptions($message)
+                );
 
-            return $response->getStatusCode() === 200;
+                if ($response->getStatusCode() != 200) {
+                    throw new TransferException(get_class($this).' request returns '.$response->getStatusCode().' - '.$url);
+                }
+            }
+
+            return true;
         } catch (GuzzleException $e) {
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());

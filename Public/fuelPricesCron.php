@@ -99,7 +99,9 @@ class fuelPricesCron extends Base
                         $type,
                         $stationData[$type]
                     );
-                    $updates->add($stationId, $stationData['postCode'], $stationData['brand'], $type, $stationData[$type]);
+
+                    $stationName = $stationData['name'].' ('.$stationData['place'].')';
+                    $updates->add($stationId, $stationData['postCode'], $stationData['brand'], $type, $stationData[$type], $stationName);
                 }
             }
         }

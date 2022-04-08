@@ -38,9 +38,6 @@ class BrandFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFil
             $this->setDebugMessage($message);
         }
 
-        dumpvar(__METHOD__.__LINE__);
-        dumpvar($doFilter);
-
         return $doFilter;
     }
 
