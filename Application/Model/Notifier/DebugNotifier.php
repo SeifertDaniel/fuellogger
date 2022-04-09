@@ -19,6 +19,8 @@ class DebugNotifier extends AbstractNotifier implements NotifierInterface
      */
     public function notify(UpdatesList $priceUpdates) : bool
     {
+        startProfile(__METHOD__);
+
         Registry::getLogger()->debug(__METHOD__.__LINE__);
 
         $priceUpdates = $this->getFilteredUpdates($priceUpdates);
@@ -31,6 +33,8 @@ class DebugNotifier extends AbstractNotifier implements NotifierInterface
 
             Registry::getLogger()->debug($message);
         }
+
+        stopProfile(__METHOD__);
 
         return true;
     }

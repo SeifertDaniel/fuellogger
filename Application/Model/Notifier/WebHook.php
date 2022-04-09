@@ -32,6 +32,8 @@ class WebHook extends AbstractNotifier implements NotifierInterface
      */
     public function notify(UpdatesList $priceUpdates) : bool
     {
+        startProfile(__METHOD__);
+
         try {
             $priceUpdates = $this->getFilteredUpdates($priceUpdates);
 
@@ -49,7 +51,7 @@ class WebHook extends AbstractNotifier implements NotifierInterface
                 );
 
                 if ($response->getStatusCode() != 200) {
-                    throw new TransferException(get_class($this).' request returns '.$response->getStatusCode().' - '.$url);
+                    throw new TransferException(get_class($this).' request returns '.$response->getStatusCode().' - '.$this->url);
                 }
             }
 
@@ -58,6 +60,8 @@ class WebHook extends AbstractNotifier implements NotifierInterface
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());
             return false;
+        } finally {
+            stopProfile(__METHOD__);
         }
     }
 

@@ -40,6 +40,8 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
      */
     public function notify(UpdatesList $priceUpdates) : bool
     {
+        startProfile(__METHOD__);
+
         try {
             $priceUpdates = $this->getFilteredUpdates($priceUpdates);
 
@@ -73,6 +75,8 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());
             return false;
+        } finally {
+            stopProfile(__METHOD__);
         }
     }
 
