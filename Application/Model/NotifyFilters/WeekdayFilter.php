@@ -37,6 +37,8 @@ class WeekdayFilter extends AbstractFilter implements DatabaseQueryFilter, HighE
      */
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $currentWeekDay = (new DateTime())->format('N');
         $doFilter = !in_array($currentWeekDay, $this->weekdays);
 
@@ -46,6 +48,8 @@ class WeekdayFilter extends AbstractFilter implements DatabaseQueryFilter, HighE
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }

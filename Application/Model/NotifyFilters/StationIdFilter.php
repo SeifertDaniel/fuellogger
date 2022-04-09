@@ -29,6 +29,8 @@ class StationIdFilter extends AbstractFilter implements ItemFilter, DatabaseQuer
      */
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $doFilter = !in_array($item->getStationId(), $this->stationIds);
 
         if ($doFilter) {
@@ -37,6 +39,8 @@ class StationIdFilter extends AbstractFilter implements ItemFilter, DatabaseQuer
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }

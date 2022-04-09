@@ -29,6 +29,8 @@ class BrandFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFil
      */
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $doFilter = !in_array($item->getStationBrand(), $this->brands);
 
         if ($doFilter) {
@@ -37,6 +39,8 @@ class BrandFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFil
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }

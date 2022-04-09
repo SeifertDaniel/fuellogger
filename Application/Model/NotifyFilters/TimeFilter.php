@@ -28,6 +28,8 @@ class TimeFilter extends AbstractFilter implements DatabaseQueryFilter, HighEffi
 
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $f = DateTime::createFromFormat('!H:i:s', $this->from);
         $t = DateTime::createFromFormat('!H:i:s', $this->till);
         $i = (new DateTime())->setDate($f->format('Y'),$f->format('m'), $f->format('d'));
@@ -41,6 +43,8 @@ class TimeFilter extends AbstractFilter implements DatabaseQueryFilter, HighEffi
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }

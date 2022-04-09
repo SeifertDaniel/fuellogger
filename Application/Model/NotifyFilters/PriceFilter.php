@@ -11,7 +11,6 @@ use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficenc
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\ParameterType;
 
 class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFilter, MediumEfficencyFilter
 {
@@ -43,6 +42,8 @@ class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFil
      */
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $doFilter = !version_compare((float) $item->getFuelPrice(), $this->price, $this->checkIsValid($this->operator));
 
         if ($doFilter) {
@@ -51,6 +52,8 @@ class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFil
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }

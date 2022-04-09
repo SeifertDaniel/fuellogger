@@ -29,6 +29,8 @@ class PostCodeFilter extends AbstractFilter implements DatabaseQueryFilter, Item
      */
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $doFilter = !in_array($item->getStationPostCode(), $this->postCodes);
 
         if ($doFilter) {
@@ -37,6 +39,8 @@ class PostCodeFilter extends AbstractFilter implements DatabaseQueryFilter, Item
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }

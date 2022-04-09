@@ -29,6 +29,8 @@ class FuelTypeFilter extends AbstractFilter implements ItemFilter, DatabaseQuery
      */
     public function filterItem(UpdatesItem $item): bool
     {
+        startProfile(__METHOD__);
+
         $doFilter = !in_array($item->getFuelType(), $this->fuelTypes);
 
         if ($doFilter) {
@@ -37,6 +39,8 @@ class FuelTypeFilter extends AbstractFilter implements ItemFilter, DatabaseQuery
             Registry::getLogger()->debug($message);
             $this->setDebugMessage($message);
         }
+
+        stopProfile(__METHOD__);
 
         return $doFilter;
     }
