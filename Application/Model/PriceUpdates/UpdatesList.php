@@ -13,7 +13,7 @@ class UpdatesList
         $itm->setStationPostCode($postCode);
         $itm->setStationBrand($brand);
         $itm->setFuelType($type);
-        $itm->setFuelPrice($price);
+        $itm->setFuelPrice((float) $price);
         $itm->setStationName($station);
         $this->array[] = $itm;
     }

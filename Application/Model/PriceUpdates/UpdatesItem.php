@@ -76,17 +76,17 @@ class UpdatesItem
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getFuelPrice(): string
+    public function getFuelPrice(): float
     {
-        return $this->fuelPrice;
+        return (float) $this->fuelPrice;
     }
 
     /**
-     * @param string $fuelPrice
+     * @param float $fuelPrice
      */
-    public function setFuelPrice(string $fuelPrice): void
+    public function setFuelPrice(float $fuelPrice): void
     {
         $this->fuelPrice = $fuelPrice;
     }
