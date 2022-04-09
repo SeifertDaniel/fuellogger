@@ -59,6 +59,6 @@ class DateFilter extends AbstractFilter implements DatabaseQueryFilter, HighEffi
     public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
     {
         $connection = DBConnection::getConnection();
-        return 'DATE_FORMAT('.$priceTableAlias.'.datetime, "%d:%m:%Y") BETWEEN '.$connection->quote($this->from).' AND '.$connection->quote($this->till);
+        return 'DATE_FORMAT('.$priceTableAlias.'.datetime, "%Y-%m-%d") BETWEEN '.$connection->quote($this->from).' AND '.$connection->quote($this->till);
     }
 }
