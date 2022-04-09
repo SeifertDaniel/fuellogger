@@ -13,9 +13,9 @@ use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 
-class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
+class BetterStationPriceFilter extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
 {
-    public array $bestPriceCache = [];
+    public array $priceBeforeUpdateCache = [];
 
     /**
      * @param UpdatesItem $item
@@ -26,13 +26,13 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
     {
         startProfile(__METHOD__);
 
-        $dailyBestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate();
+        $betterStationPrice = $this->getPriceBeforeUpdate($item->getStationId());
 
-        $doFilter = $item->getFuelPrice() >= $dailyBestPriceBeforeUpdate;
+        $doFilter = $item->getFuelPrice() >= $betterStationPrice;
 
         if ($doFilter) {
             Registry::getLogger()->debug(get_class($this));
-            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not lower than $dailyBestPriceBeforeUpdate");
+            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not lower than $betterStationPrice");
         }
 
         stopProfile(__METHOD__);
@@ -41,35 +41,38 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
     }
 
     /**
+     * @param $stationId
      * @return float
      * @throws Exception
      */
-    public function getBestPriceBeforeUpdate(): float
+    public function getPriceBeforeUpdate($stationId): float
     {
         startProfile(__METHOD__);
 
-        $qb = DBConnection::getConnection()->createQueryBuilder();
+        $conn = DBConnection::getConnection();
+        $qb = $conn->createQueryBuilder();
         $qb->select('pr.price')
             ->from((new Price())->getCoreTableName(), 'pr')
             ->leftJoin('pr', (new Station())->getCoreTableName(), 'st', 'pr.stationid = st.id')
             ->where(
                 $qb->expr()->and(
                     'pr.datetime BETWEEN DATE_FORMAT(NOW(), "%Y-%m-%d 00:00:00") AND DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 2 MINUTE), "%Y-%m-%d %H:%i:%s")',
+                    'pr.stationid = '.$conn->quote($stationId),
                     $this->getFilterQuery()
                 )
             )
-            ->orderBy('pr.price', 'ASC')
+            ->orderBy('pr.datetime', 'DESC')
             ->setMaxResults(1);
 
         $queryHash = md5($qb);
 
-        if (!isset($this->bestPriceCache[$queryHash]) || !$this->bestPriceCache[$queryHash]) {
+        if (!isset($this->priceBeforeUpdateCache[$queryHash]) || !$this->priceBeforeUpdateCache[$queryHash]) {
             startProfile(__METHOD__.'::notCached');
-            $this->bestPriceCache[$queryHash] = (float) $qb->fetchOne() ?: 10.0;
+            $this->priceBeforeUpdateCache[$queryHash] = (float) $qb->fetchOne() ?: 10.0;
             stopProfile(__METHOD__.'::notCached');
         }
 
-        $return = $this->bestPriceCache[$queryHash];
+        $return = $this->priceBeforeUpdateCache[$queryHash];
 
         stopProfile(__METHOD__);
 
