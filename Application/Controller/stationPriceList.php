@@ -14,7 +14,6 @@ use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
-use Exception;
 use ezcBasePropertyNotFoundException;
 use ezcBaseValueException;
 use ezcGraph;

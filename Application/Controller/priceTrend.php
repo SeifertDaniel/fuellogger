@@ -10,7 +10,6 @@ use Daniels\FuelLogger\Application\Model\PriceArchive;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
-use Exception;
 use ezcGraph;
 use ezcGraphArrayDataSet;
 use ezcGraphAxisRotatedLabelRenderer;

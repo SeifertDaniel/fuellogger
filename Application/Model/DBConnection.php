@@ -4,6 +4,7 @@ namespace Daniels\FuelLogger\Application\Model;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception as DoctrineException;
 use Exception;
 
 class DBConnection
@@ -12,9 +13,9 @@ class DBConnection
 
     /**
      * @return Connection
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DoctrineException
      */
-    public static function getConnection()
+    public static function getConnection(): ?Connection
     {
         if (static::$instance === null) {
             $connectionParams = [
@@ -48,13 +49,20 @@ class DBConnection
 
     /**
      * prevent from being unserialized (which would create a second instance of it)
+     * @return mixed
+     * @throws Exception
      */
     public function __wakeup()
     {
         throw new Exception("Cannot unserialize singleton");
     }
 
-    public static function generateRandomString($length = 32) {
+    /**
+     * @param $length
+     * @return string
+     */
+    public static function generateRandomString($length = 32): string
+    {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';

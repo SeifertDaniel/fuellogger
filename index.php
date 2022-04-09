@@ -7,11 +7,19 @@ use Daniels\FuelLogger\Application\Model\ControllerMapper;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
 use Exception;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 require_once dirname(__FILE__) . "/bootstrap.php";
 
 class index extends Base
 {
+    /**
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
     public function __construct()
     {
         parent::__construct();
