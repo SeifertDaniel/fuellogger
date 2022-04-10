@@ -44,7 +44,31 @@ class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFil
     {
         startProfile(__METHOD__);
 
-        $doFilter = !version_compare((float) $item->getFuelPrice(), $this->price, $this->checkIsValid($this->operator));
+        switch ($this->operator) {
+            case self::EQUALS:
+                $valid = $item->getFuelPrice() === $this->price;
+                break;
+            case self::HIGHERTHAN:
+                $valid = $item->getFuelPrice() > $this->price;
+                break;
+            case self::HIGHERTHANEQUALS:
+                $valid = $item->getFuelPrice() >= $this->price;
+                break;
+            case self::LOWERTHAN:
+                $valid = $item->getFuelPrice() < $this->price;
+                break;
+            case self::LOWERTHANEQUALS:
+                $valid = $item->getFuelPrice() <= $this->price;
+                break;
+            case self::NOTEQUALS:
+                $valid = $item->getFuelPrice() <> $this->price;
+                break;
+            default:
+                $this->setDebugMessage('invalid price comparison operator '.$this->operator);
+                throw new filterPreventsNotificationException($this);
+        }
+
+        $doFilter = !$valid;
 
         if ($doFilter) {
             $message = "price ".$item->getFuelPrice()." is ".$this->operator." ". $this->price;

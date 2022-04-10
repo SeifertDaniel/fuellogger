@@ -26,9 +26,13 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
     {
         startProfile(__METHOD__);
 
-        $dailyBestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate();
+        Registry::getLogger()->debug(__METHOD__);
 
-        $doFilter = $item->getFuelPrice() >= $dailyBestPriceBeforeUpdate;
+        $dailyBestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate();
+        $lowestUpdatePrice = $this->getNotifier()->getUpdateList()->getLowestPrice();
+
+        $doFilter = $item->getFuelPrice() >= $dailyBestPriceBeforeUpdate ||
+            $item->getFuelPrice() > $lowestUpdatePrice;
 
         if ($doFilter) {
             Registry::getLogger()->debug(get_class($this));

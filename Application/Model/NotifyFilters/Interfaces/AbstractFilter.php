@@ -6,6 +6,7 @@ use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationEx
 use Daniels\FuelLogger\Application\Model\Notifier\AbstractNotifier;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
+use Daniels\FuelLogger\Core\Registry;
 
 abstract class AbstractFilter
 {
@@ -52,7 +53,9 @@ abstract class AbstractFilter
     public function filterPriceUpdates(UpdatesList $priceUpdates): UpdatesList
     {
         if ($this instanceof ItemFilter) {
+            Registry::getLogger()->debug(__METHOD__.__LINE__);
             /** @var UpdatesItem $priceUpdate */
+
             foreach ($priceUpdates->getList() as $id => $priceUpdate) {
                 $filtered = $this->filterItem($priceUpdate);
                 $filtered = $this->isInverted ? !$filtered : $filtered;
@@ -64,6 +67,7 @@ abstract class AbstractFilter
                 }
             }
         } else {
+            Registry::getLogger()->debug(__METHOD__.__LINE__);
             $filtered = $this->filterItem(new UpdatesItem());
             $filtered = $this->isInverted ? !$filtered : $filtered;
             if ($filtered) {
