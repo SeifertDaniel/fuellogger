@@ -27,21 +27,26 @@ class WebHook extends AbstractNotifier implements NotifierInterface
      * @param UpdatesList $priceUpdates
      *
      * @return bool
-     * @throws DoctrineException
      * @throws filterPreventsNotificationException
      */
     public function notify(UpdatesList $priceUpdates) : bool
     {
         startProfile(__METHOD__);
 
+        Registry::getLogger()->debug(__METHOD__);
+
+        $this->setUpdateList($priceUpdates);
+
         try {
-            $priceUpdates = $this->getFilteredUpdates($priceUpdates);
+            $this->filterUpdates();
 
             /** @var UpdatesItem $item */
-            foreach ($priceUpdates->getList() as $item) {
+            foreach ($this->getUpdateList()->getList() as $item) {
                 Registry::getLogger()->debug(get_class($this).' notifies');
                 $message = 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . $item->getStationName();
                 $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
+
+                startProfile(__METHOD__.'::request');
 
                 $client = new Client();
                 $response = $client->request(
@@ -49,6 +54,8 @@ class WebHook extends AbstractNotifier implements NotifierInterface
                     $this->url,
                     $this->getSubmittedOptions($message)
                 );
+
+                stopProfile(__METHOD__.'::request');
 
                 if ($response->getStatusCode() != 200) {
                     throw new TransferException(get_class($this).' request returns '.$response->getStatusCode().' - '.$this->url);

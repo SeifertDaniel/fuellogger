@@ -8,12 +8,14 @@ use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryF
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\MediumEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
+use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 
 abstract class AbstractNotifier implements NotifierInterface
 {
     protected array $filters = [];
     protected bool $filtersAreSorted = false;
+    protected UpdatesList $updateList;
 
     /**
      * @param AbstractFilter $filter
@@ -56,21 +58,18 @@ abstract class AbstractNotifier implements NotifierInterface
     }
 
     /**
-     * @param UpdatesList $priceUpdates
-     *
-     * @return UpdatesList
-     * @throws Exception
      * @throws filterPreventsNotificationException
      */
-    public function getFilteredUpdates(UpdatesList $priceUpdates) : UpdatesList
+    public function filterUpdates()
     {
+        Registry::getLogger()->debug(__METHOD__);
+
         /** @var AbstractFilter $filter */
         foreach ($this->getFilters() as $filter) {
+            Registry::getLogger()->debug(get_class($filter));
             $filter->setNotifier($this);
-            $priceUpdates = $filter->filterPriceUpdates($priceUpdates);
+            $this->setUpdateList($filter->filterPriceUpdates($this->getUpdateList()));
         }
-
-        return $priceUpdates;
     }
 
     public function sortFiltersByEfficency()
@@ -95,5 +94,21 @@ abstract class AbstractNotifier implements NotifierInterface
         $this->filters = array_merge($highEfficency, $mediumEfficency, $lowEfficency);
 
         $this->filtersAreSorted = true;
+    }
+
+    /**
+     * @return UpdatesList
+     */
+    public function getUpdateList(): UpdatesList
+    {
+        return $this->updateList;
+    }
+
+    /**
+     * @param UpdatesList $updateList
+     */
+    public function setUpdateList(UpdatesList $updateList): void
+    {
+        $this->updateList = $updateList;
     }
 }

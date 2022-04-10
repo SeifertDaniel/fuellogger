@@ -6,7 +6,6 @@ use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationEx
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
-use Doctrine\DBAL\Exception as DoctrineException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
@@ -35,26 +34,28 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
      * @param UpdatesList $priceUpdates
      *
      * @return bool
-     * @throws DoctrineException
      * @throws filterPreventsNotificationException
      */
     public function notify(UpdatesList $priceUpdates) : bool
     {
         startProfile(__METHOD__);
 
+        Registry::getLogger()->debug(__METHOD__.' - started');
+
+        $this->setUpdateList($priceUpdates);
+
         try {
-            $priceUpdates = $this->getFilteredUpdates($priceUpdates);
+            $this->filterUpdates();
 
             Registry::getLogger()->debug(get_class($this).' notifies');
             $message = '';
 
             /** @var UpdatesItem $item */
-            foreach ($priceUpdates->getList() as $item) {
+            foreach ($this->getUpdateList()->getList() as $item) {
                 $message .= 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . utf8_decode($item->getStationName()) . PHP_EOL;
             }
 
             $url = 'https://api.callmebot.com/'.$this->endpoint.'?'.$this->getQuery($message);
-
             $client = new Client();
             $response = $client->get($url, [
                 'connect_timeout' => 15,
@@ -70,14 +71,18 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
                 throw new TransferException(get_class($this).' request returns '.$errorMsg.' - '.$url);
             }
 
-            return true;
+            Registry::getLogger()->debug(__METHOD__.' - finished - '.$message);
         } catch (GuzzleException $e) {
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());
-            return false;
-        } finally {
+
             stopProfile(__METHOD__);
+            return false;
         }
+
+        stopProfile(__METHOD__);
+
+        return true;
     }
 
     abstract public function getQuery($message);

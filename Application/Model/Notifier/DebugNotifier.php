@@ -14,25 +14,26 @@ class DebugNotifier extends AbstractNotifier implements NotifierInterface
      * @param UpdatesList $priceUpdates
      *
      * @return bool
-     * @throws DoctrineException
      * @throws filterPreventsNotificationException
      */
     public function notify(UpdatesList $priceUpdates) : bool
     {
         startProfile(__METHOD__);
 
+        $this->setUpdateList($priceUpdates);
+
         Registry::getLogger()->debug(__METHOD__.__LINE__);
 
-        $priceUpdates = $this->getFilteredUpdates($priceUpdates);
+        $this->filterUpdates();
 
+        $message = '';
         /** @var UpdatesItem $item */
-        foreach ($priceUpdates->getList() as $item) {
-            $message = 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . $item->getStationName();
-
-            Registry::getLogger()->debug(__METHOD__ . __LINE__);
-
-            Registry::getLogger()->debug($message);
+        foreach ($this->getUpdateList()->getList() as $item) {
+            $message .= 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . $item->getStationName().PHP_EOL;
         }
+
+        Registry::getLogger()->debug(__METHOD__ . __LINE__);
+        Registry::getLogger()->debug($message);
 
         stopProfile(__METHOD__);
 
