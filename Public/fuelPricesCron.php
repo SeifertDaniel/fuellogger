@@ -33,11 +33,15 @@ class fuelPricesCron extends Base
     {
         parent::__construct();
 
+        Registry::getLogger()->debug(__FILE__." cron started");
+
         $this->api = new ApiClient($_ENV['TKAPIKEY']);
 
         $this->addCurrent();
 
         $this->finalize();
+
+        Registry::getLogger()->debug(__FILE__." cron finished");
     }
 
     /**
@@ -65,6 +69,10 @@ class fuelPricesCron extends Base
      */
     public function addFromSurroundingSearch(): UpdatesList
     {
+        startProfile(__METHOD__);
+
+        Registry::getLogger()->debug(__METHOD__);
+
         $updates = new UpdatesList();
 
         foreach ($this->getStations() as $stationTkId => $stationData) {
@@ -105,6 +113,9 @@ class fuelPricesCron extends Base
                 }
             }
         }
+
+        stopProfile(__METHOD__);
+
         return $updates;
     }
 
