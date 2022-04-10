@@ -43,4 +43,21 @@ class UpdatesList
     {
         $this->array = [];
     }
+
+    /**
+     * @return float
+     */
+    public function getLowestPrice(): float
+    {
+        $lowest = null;
+
+        /** @var UpdatesItem $item */
+        foreach ($this->getList() as $item) {
+            if ($lowest === null || $lowest > $item->getFuelPrice()) {
+                $lowest = $item->getFuelPrice();
+            }
+        }
+
+        return $lowest;
+    }
 }

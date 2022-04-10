@@ -2,6 +2,7 @@
 
 namespace Daniels\FuelLogger\Application\Model;
 
+use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -58,6 +59,10 @@ class Price
         $price
     ): UuidInterface
     {
+        startProfile(__METHOD__);
+
+        Registry::getLogger()->debug(__METHOD__);
+
         $uuid = Uuid::uuid4();
 
         $conn = DBConnection::getConnection();
@@ -72,6 +77,8 @@ class Price
             ]);
 
         $qb->executeQuery();
+
+        stopProfile(__METHOD__);
 
         return $uuid;
     }

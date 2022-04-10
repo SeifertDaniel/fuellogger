@@ -21,6 +21,8 @@ class PriceNotifier
     {
         startProfile(__METHOD__);
 
+        Registry::getLogger()->debug(__METHOD__);
+
         $this->updatePrices = $updatePrices;
 
         $this->notify();
@@ -35,9 +37,12 @@ class PriceNotifier
     {
         startProfile(__METHOD__);
 
+        Registry::getLogger()->debug(__METHOD__);
+
         /** @var NotifierInterface $notifier */
         foreach((new NotifierList())->getList() as $notifier) {
             try {
+                Registry::getLogger()->debug(__METHOD__);
                 $notifier->notify( clone $this->updatePrices );
             } catch (filterPreventsNotificationException $e) {
                 Registry::getLogger()->debug($e->getMessage());
