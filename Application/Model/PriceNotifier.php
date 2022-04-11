@@ -5,6 +5,7 @@ namespace Daniels\FuelLogger\Application\Model;
 use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationException;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierInterface;
 use Daniels\FuelLogger\Application\Model\Notifier\NotifierList;
+use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
@@ -25,7 +26,29 @@ class PriceNotifier
 
         $this->updatePrices = $updatePrices;
 
+        $this->sortUpdateItemsByPrice();
+
         $this->notify();
+
+        stopProfile(__METHOD__);
+    }
+
+    public function sortUpdateItemsByPrice()
+    {
+        startProfile(__METHOD__);
+
+        $updatePriceList = $this->updatePrices->getList();
+
+        usort(
+            $updatePriceList,
+            function ($a, $b) {
+                /** @var $a UpdatesItem */
+                /** @var $b UpdatesItem */
+                return strcmp($a->getFuelPrice(), $b->getFuelPrice());
+            }
+        );
+
+        $this->updatePrices->setList($updatePriceList);
 
         stopProfile(__METHOD__);
     }
