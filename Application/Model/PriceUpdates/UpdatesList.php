@@ -26,6 +26,21 @@ class UpdatesList
         return $this->array;
     }
 
+    /**
+     * @param array $list
+     * @return void
+     */
+    public function setList(array $list)
+    {
+        foreach ($list as $item) {
+            if (!$item instanceof UpdatesItem) {
+                throw new \RuntimeException('UpdatesList items must be instance of UpdatesItem');
+            }
+        }
+
+        $this->array = $list;
+    }
+
     public function remove($id)
     {
         unset($this->array[$id]);
