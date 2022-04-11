@@ -1,9 +1,10 @@
 html {
-    background: url(../images/fuel.jpg) repeat-x center bottom fixed;
-    -webkit-background-size: auto;
-    -moz-background-size: auto;
-    -o-background-size: auto;
-    background-size: auto;
+    background: #ffffff;
+    background: -moz-linear-gradient(top,  #ffffff 50%, #100300 50%, #804b15 50.5%, #804b15 52%, #ffe26c 52.5%, #ffe26c 54%, #3d2600 54.5%, #fff5d1 54.5%, #e2b71b 74%, #734410 100%);
+    background: -webkit-linear-gradient(top,  #ffffff 50%,#100300 50%,#804b15 50.5%,#804b15 52%,#ffe26c 52.5%,#ffe26c 54%,#3d2600 54.5%,#fff5d1 54.5%,#e2b71b 74%,#734410 100%);
+    background: linear-gradient(to bottom,  #ffffff 50%,#100300 50%,#804b15 50.5%,#804b15 52%,#ffe26c 52.5%,#ffe26c 54%,#3d2600 54.5%,#fff5d1 54.5%,#e2b71b 74%,#734410 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#734410',GradientType=0 );
+    background-attachment: fixed;
 }
 
 body {
