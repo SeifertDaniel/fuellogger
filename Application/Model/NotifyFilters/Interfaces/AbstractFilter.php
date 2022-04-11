@@ -52,10 +52,10 @@ abstract class AbstractFilter
      */
     public function filterPriceUpdates(UpdatesList $priceUpdates): UpdatesList
     {
-        if ($this instanceof ItemFilter) {
-            Registry::getLogger()->debug(__METHOD__.__LINE__);
-            /** @var UpdatesItem $priceUpdate */
+        Registry::getLogger()->debug(__METHOD__.__LINE__);
 
+        if ($this->isItemFilter()) {
+            /** @var UpdatesItem $priceUpdate */
             foreach ($priceUpdates->getList() as $id => $priceUpdate) {
                 $filtered = $this->filterItem($priceUpdate);
                 $filtered = $this->isInverted ? !$filtered : $filtered;
@@ -67,7 +67,6 @@ abstract class AbstractFilter
                 }
             }
         } else {
-            Registry::getLogger()->debug(__METHOD__.__LINE__);
             $filtered = $this->filterItem(new UpdatesItem());
             $filtered = $this->isInverted ? !$filtered : $filtered;
             if ($filtered) {
@@ -92,5 +91,13 @@ abstract class AbstractFilter
     public function setNotifier(AbstractNotifier $notifier): void
     {
         $this->notifier = $notifier;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isItemFilter(): bool
+    {
+        return $this instanceof ItemFilter;
     }
 }
