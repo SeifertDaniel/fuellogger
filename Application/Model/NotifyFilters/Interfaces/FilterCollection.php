@@ -5,7 +5,7 @@ namespace Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 
-abstract class FilterCollection extends AbstractFilter implements LowEfficencyFilter
+abstract class FilterCollection extends AbstractFilter implements DatabaseQueryFilter, LowEfficencyFilter
 {
     abstract public function getFilterList(): array;
 
@@ -66,5 +66,23 @@ abstract class FilterCollection extends AbstractFilter implements LowEfficencyFi
         }
 
         return array_merge($highEfficency, $mediumEfficency, $lowEfficency);
+    }
+
+    /**
+     * @param string $priceTableAlias
+     * @param string $stationTableAlias
+     * @return string
+     */
+    public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
+    {
+        return implode(
+            ' AND ',
+            array_map(
+                function (AbstractQueryFilter $filter) use ($priceTableAlias, $stationTableAlias) {
+                    return $filter->getFilterQuery($priceTableAlias, $stationTableAlias);
+                },
+                $this->getFilterList()
+            )
+        );
     }
 }
