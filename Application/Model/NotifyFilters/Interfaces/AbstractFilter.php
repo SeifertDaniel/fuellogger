@@ -18,6 +18,8 @@ abstract class AbstractFilter
 
     protected AbstractNotifier $notifier;
 
+    protected FilterCollection $parentFilter;
+
     /**
      * @return $this
      */
@@ -99,5 +101,29 @@ abstract class AbstractFilter
     public function isItemFilter(): bool
     {
         return $this instanceof ItemFilter;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasParentFilter(): bool
+    {
+        return isset($this->parentFilter);
+    }
+
+    /**
+     * @return FilterCollection
+     */
+    public function getParentFilter(): FilterCollection
+    {
+        return $this->parentFilter;
+    }
+
+    /**
+     * @param FilterCollection $parentFilter
+     */
+    public function setParentFilter(FilterCollection $parentFilter): void
+    {
+        $this->parentFilter = $parentFilter;
     }
 }

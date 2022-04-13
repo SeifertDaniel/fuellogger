@@ -65,9 +65,11 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
             ->orderBy('pr.price', 'ASC')
             ->setMaxResults(1);
 
+        Registry::getLogger()->debug($qb->getSQL());
         $queryHash = md5($qb);
 
         if (!isset($this->bestPriceCache[$queryHash]) || !$this->bestPriceCache[$queryHash]) {
+            Registry::getLogger()->debug('not from cache');
             startProfile(__METHOD__.'::notCached');
             $this->bestPriceCache[$queryHash] = (float) $qb->fetchOne() ?: 10.0;
             stopProfile(__METHOD__.'::notCached');

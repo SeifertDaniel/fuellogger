@@ -78,11 +78,29 @@ abstract class FilterCollection extends AbstractFilter implements DatabaseQueryF
         return implode(
             ' AND ',
             array_map(
-                function (AbstractQueryFilter $filter) use ($priceTableAlias, $stationTableAlias) {
+                function (DatabaseQueryFilter $filter) use ($priceTableAlias, $stationTableAlias) {
                     return $filter->getFilterQuery($priceTableAlias, $stationTableAlias);
                 },
-                $this->getFilterList()
+                $this->getQueryFilters()
             )
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryFilters(): array
+    {
+        $queryFilters = [];
+
+        /** @var AbstractFilter $filter */
+        foreach ($this->getFilterList() as $filter) {
+            $filter->setParentFilter($this);
+            if ($filter instanceof DatabaseQueryFilter) {
+                $queryFilters[] = $filter;
+            }
+        }
+
+        return $queryFilters;
     }
 }
