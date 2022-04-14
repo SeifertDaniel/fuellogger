@@ -11,8 +11,12 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-require_once dirname(__FILE__) . "/bootstrap.php";
-
+try {
+    require_once dirname(__FILE__) . "/bootstrap.php";
+} catch (Exception $e) {
+    Registry::getLogger()->error($e->getMessage());
+    Registry::getLogger()->error($e->getTraceAsString());
+}
 class index extends Base
 {
     /**
