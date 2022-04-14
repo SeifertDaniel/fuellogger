@@ -3,13 +3,14 @@
 namespace Daniels\FuelLogger\Application\Controller;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Entities\OilPrice;
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\PriceArchive;
 use Daniels\FuelLogger\Application\Model\ezcGraph\svgFixer;
-use Daniels\FuelLogger\Application\Model\OilPrice;
-use Daniels\FuelLogger\Application\Model\Price;
-use Daniels\FuelLogger\Application\Model\PriceArchive;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
+use Doctrine\ORM\ORMException;
 use ezcGraph;
 use ezcGraphArrayDataSet;
 use ezcGraphAxisRotatedLabelRenderer;
@@ -97,15 +98,16 @@ class priceTrend implements controllerInterface
      *
      * @return array
      * @throws DoctrineException
+     * @throws ORMException
      */
     protected function getFuelStats( ?Connection $conn ): array
     {
         startProfile(__METHOD__);
 
-        $prices     = new Price();
-        $priceTable = $prices->getCoreTableName();
-        $pricesArchive = new PriceArchive();
-        $priceArchiveTable = $pricesArchive->getCoreTableName();
+        $em = Registry::getEntityManager();
+
+        $priceTable = $em->getClassMetadata( Price::class)->getTableName();
+        $priceArchiveTable = $em->getClassMetadata( PriceArchive::class)->getTableName();
 
         $qb1 = $conn->createQueryBuilder();
         $qb1->select( 'pra.avg as price', 'pra.date', 'pra.type' )
@@ -148,12 +150,12 @@ class priceTrend implements controllerInterface
     {
         startProfile(__METHOD__);
 
-        $prices     = new OilPrice();
-        $priceTable = $prices->getCoreTableName();
+        $em = Registry::getEntityManager();
+        $oilPriceTable = $em->getClassMetadata( OilPrice::class)->getTableName();
 
         $qb = $conn->createQueryBuilder();
         $qb->select( 'pr.price', 'pr.date' )
-           ->from( $priceTable, 'pr' )
+           ->from( $oilPriceTable, 'pr' )
            ->where(
                $qb->expr()->lt(
                    'pr.date',

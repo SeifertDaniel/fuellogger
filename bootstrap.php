@@ -34,4 +34,6 @@ if (Debug::displayErrors()) {
     error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 }
 
+\Doctrine\DBAL\Types\Type::addType('uuid', 'Ramsey\Uuid\Doctrine\UuidType');
+
 require_once BASE_PATH . 'functions.php';

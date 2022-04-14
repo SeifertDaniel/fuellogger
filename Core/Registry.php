@@ -3,6 +3,9 @@
 namespace Daniels\FuelLogger\Core;
 
 use Daniels\FuelLogger\Application\Model\Logger;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Tools\Setup;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -64,6 +67,30 @@ class Registry
             self::set('twig', $twig);
         }
         return self::get('twig');
+    }
+
+    /**
+     * @return EntityManager
+     * @throws ORMException
+     */
+    public static function getEntityManager(): EntityManager
+    {
+        startProfile(__METHOD__);
+
+        $connectionParams = [
+            'dbname' => $_ENV['DBNAME'],
+            'user' => $_ENV['DBUSER'],
+            'password' => $_ENV['DBPASS'],
+            'host' => $_ENV['DBHOST'],
+            'driver' => $_ENV['DBDRIVER'],
+            'charset' => 'utf8mb4'
+        ];
+
+        $em = EntityManager::create($connectionParams, Setup::createAttributeMetadataConfiguration([__DIR__ . '/../Application/Model/Entities']));
+
+        stopProfile(__METHOD__);
+
+        return $em;
     }
 
     public static function getKeys()

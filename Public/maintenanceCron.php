@@ -3,16 +3,18 @@
 namespace Daniels\FuelLogger\PublicDir;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Entities\OilPrice;
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\PriceArchive;
 use Daniels\FuelLogger\Application\Model\Exceptions\OilPriceAlreadyExistException;
-use Daniels\FuelLogger\Application\Model\OilPrice;
+use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApi;
 use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApiException;
-use Daniels\FuelLogger\Application\Model\Price;
-use Daniels\FuelLogger\Application\Model\PriceArchive;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
-use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApi;
 use DateTime;
 use Doctrine\DBAL\Exception as DoctrineException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
 
 require_once dirname(__FILE__) . "/../bootstrap.php";
@@ -26,6 +28,8 @@ class maintenanceCron extends Base
     /**
      * @throws CommoditiesApiException
      * @throws DoctrineException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function __construct()
     {
@@ -43,6 +47,8 @@ class maintenanceCron extends Base
      * @return void
      * @throws CommoditiesApiException
      * @throws DoctrineException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function addCurrentOilPrices()
     {
@@ -58,7 +64,11 @@ class maintenanceCron extends Base
 
             $rates = $this->api->request([CommoditiesApi::SYMBOL_BRENTOIL]);
 
-            $oilPrice->insert(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
+            $oilPrice->setPrice(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
+
+            $em = Registry::getEntityManager();
+            $em->persist($oilPrice);
+            $em->flush();
         } catch (OilPriceAlreadyExistException $e) {
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());
@@ -67,16 +77,18 @@ class maintenanceCron extends Base
         stopProfile(__METHOD__);
     }
 
+    /**
+     * @throws ORMException
+     */
     public function transferPricesToArchive()
     {
         startProfile(__METHOD__);
 
         try {
-            $price = new Price();
-            $priceTable = $price->getCoreTableName();
+            $em = Registry::getEntityManager();
 
-            $priceArchive = new PriceArchive();
-            $priceArchiveTable = $priceArchive->getCoreTableName();
+            $priceTable = $em->getClassMetadata( Price::class)->getTableName();
+            $priceArchiveTable = $em->getClassMetadata( PriceArchive::class)->getTableName();
 
             $conn = DBConnection::getConnection();
 

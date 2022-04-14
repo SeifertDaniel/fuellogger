@@ -2,6 +2,10 @@
 
 namespace Daniels\FuelLogger\Application\Model;
 
+use Daniels\FuelLogger\Application\Model\Entities\openingTimes;
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\Station;
+use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
 
@@ -14,9 +18,11 @@ class BestPrice
      */
     public function getQueryBuilder(string $type = Fuel::TYPE_E10): QueryBuilder
     {
-        $stationTable = (new Station())->getCoreTableName();
-        $priceTable = (new Price())->getCoreTableName();
-        $openingTimesTable = (new openingTimes('undefined'))->getCoreTableName();
+        $em = Registry::getEntityManager();
+
+        $stationTable = $em->getClassMetadata( Station::class)->getTableName();
+        $priceTable = $em->getClassMetadata( Price::class)->getTableName();
+        $openingTimesTable = $em->getClassMetadata( openingTimes::class)->getTableName();
 
         $conn = DBConnection::getConnection();
 

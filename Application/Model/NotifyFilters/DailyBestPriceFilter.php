@@ -3,15 +3,15 @@
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\Station;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractQueryFilter;
-use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\ItemFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\LowEfficencyFilter;
-use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
-use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\ORMException;
 
 class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
 {
@@ -47,15 +47,20 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
     /**
      * @return float
      * @throws Exception
+     * @throws ORMException
      */
     public function getBestPriceBeforeUpdate(): float
     {
         startProfile(__METHOD__);
 
+        $em = Registry::getEntityManager();
+        $priceTable = $em->getClassMetadata( Price::class)->getTableName();
+        $stationTable = $em->getClassMetadata( Station::class)->getTableName();
+
         $qb = DBConnection::getConnection()->createQueryBuilder();
         $qb->select('pr.price')
-            ->from((new Price())->getCoreTableName(), 'pr')
-            ->leftJoin('pr', (new Station())->getCoreTableName(), 'st', 'pr.stationid = st.id')
+            ->from($priceTable, 'pr')
+            ->leftJoin('pr', $stationTable, 'st', 'pr.stationid = st.id')
             ->where(
                 $qb->expr()->and(
                     'pr.datetime BETWEEN DATE_FORMAT(NOW(), "%Y-%m-%d 00:00:00") AND DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 2 MINUTE), "%Y-%m-%d %H:%i:%s")',

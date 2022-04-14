@@ -1,12 +1,24 @@
 <?php
 
-namespace Daniels\FuelLogger\Application\Model;
+namespace Daniels\FuelLogger\Application\Model\Entities;
 
+use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Core\Registry;
 use DateTime;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\CustomIdGenerator;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\Table;
 use Exception;
+use Ramsey\Uuid\Doctrine\UuidGenerator;
 
+#[Entity]
+#[Table('openingtimes')]
 class openingTimes
 {
     const WDAY_MON = 1;  // 1
@@ -18,21 +30,110 @@ class openingTimes
     const WDAY_SUN = 7;  // 64
     const WDAY_FEA = 8;  // 128
 
-    protected string $stationId;
+    #[Id]
+    #[Column(type: 'uuid', unique: true), GeneratedValue(strategy: 'CUSTOM'), CustomIdGenerator(class: UuidGenerator::class)]
+    private string $id;
+
+    #[ManyToOne(targetEntity: Station::class)]
+    #[Column(type: 'uuid')]
+    private string $stationId;
+
+    #[Column]
+    private int $weekday;
+
+    #[Column(type: 'time')]
+    private string $from;
+
+    #[Column(type: 'time')]
+    private string $to;
+
+    protected string $loadedStationId;
 
     protected array $openingTimes = [];
 
-    public function __construct($stationId)
+    /**
+     * @return string
+     */
+    public function getId(): string
     {
-        $this->stationId = $stationId;
+        return $this->id;
     }
 
     /**
      * @return string
      */
-    public function getCoreTableName(): string
+    public function getStationId(): string
     {
-        return 'openingtimes';
+        return $this->stationId;
+    }
+
+    /**
+     * @param string $stationId
+     * @return openingTimes
+     */
+    public function setStationId(string $stationId): openingTimes
+    {
+        $this->stationId = $stationId;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getWeekday(): int
+    {
+        return $this->weekday;
+    }
+
+    /**
+     * @param int $weekday
+     * @return openingTimes
+     */
+    public function setWeekday(int $weekday): openingTimes
+    {
+        $this->weekday = $weekday;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFrom(): string
+    {
+        return $this->from;
+    }
+
+    /**
+     * @param string $from
+     * @return openingTimes
+     */
+    public function setFrom(string $from): openingTimes
+    {
+        $this->from = $from;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTo(): string
+    {
+        return $this->to;
+    }
+
+    /**
+     * @param string $to
+     * @return openingTimes
+     */
+    public function setTo(string $to): openingTimes
+    {
+        $this->to = $to;
+        return $this;
+    }
+
+    public function load($stationId)
+    {
+        $this->loadedStationId = $stationId;
     }
 
     /**
@@ -65,12 +166,15 @@ class openingTimes
 
         $qb = DBConnection::getConnection()->createQueryBuilder();
 
+        $em = Registry::getEntityManager();
+        $openingTimesTable = $em->getClassMetadata( openingTimes::class)->getTableName();
+
         $qb->select(1)
-            ->from($this->getCoreTableName(), 'ot')
+            ->from($openingTimesTable, 'ot')
             ->where($qb->expr()->and(
                 $qb->expr()->eq(
                     'ot.stationid',
-                    $qb->createNamedParameter($this->stationId)
+                    $qb->createNamedParameter($this->loadedStationId)
                 ),
                 'ot.weekday & '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER).' = '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER),
                 $qb->createNamedParameter($checkDate).' BETWEEN ot.from AND ot.to'
@@ -103,13 +207,16 @@ class openingTimes
 
         $qb = DBConnection::getConnection()->createQueryBuilder();
 
+        $em = Registry::getEntityManager();
+        $openingTimesTable = $em->getClassMetadata( openingTimes::class)->getTableName();
+
         $qb->select('ot.from', 'ot.to')
-            ->from($this->getCoreTableName(), 'ot')
+            ->from($openingTimesTable, 'ot')
             ->where(
                 $qb->expr()->and(
                     $qb->expr()->eq(
                         'ot.stationid',
-                        $qb->createNamedParameter($this->stationId)
+                        $qb->createNamedParameter($this->loadedStationId)
                     ),
                     'ot.weekday & '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER).' = '.$qb->createNamedParameter($weekdayInt, ParameterType::INTEGER)
                 )
@@ -128,13 +235,16 @@ class openingTimes
     {
         $qb = DBConnection::getConnection()->createQueryBuilder();
 
+        $em = Registry::getEntityManager();
+        $openingTimesTable = $em->getClassMetadata( openingTimes::class)->getTableName();
+
         $qb->select('ot.*')
-            ->from($this->getCoreTableName(), 'ot')
+            ->from($openingTimesTable, 'ot')
             ->where(
                 $qb->expr()->and(
                     $qb->expr()->eq(
                         'ot.stationid',
-                        $qb->createNamedParameter($this->stationId)
+                        $qb->createNamedParameter($this->loadedStationId)
                     )
                 )
             );

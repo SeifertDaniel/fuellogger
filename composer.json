@@ -10,9 +10,11 @@
         "vlucas/phpdotenv": "^5.4",
         "monolog/monolog": "^2.3",
         "doctrine/migrations": "^3.4",
+        "doctrine/orm": "^2.11",
         "zetacomponents/graph": "^1.6@alpha",
         "twig/twig":"^3.3",
-        "symfony/finder":"^6.0"
+        "symfony/finder":"^6.0",
+        "symfony/cache":"^6.0"
     },
     "license": "MIT",
     "autoload": {

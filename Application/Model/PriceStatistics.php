@@ -2,13 +2,29 @@
 
 namespace Daniels\FuelLogger\Application\Model;
 
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\ORM\ORMException;
+
 class PriceStatistics
 {
-    public function getLowPriceStatsByStation($stationId, $type = Fuel::TYPE_E10)
+    /**
+     * @param        $stationId
+     * @param string $type
+     *
+     * @return QueryBuilder
+     * @throws Exception
+     * @throws ORMException
+     */
+    public function getLowPriceStatsByStation($stationId, $type = Fuel::TYPE_E10): QueryBuilder
     {
         $connection = DBConnection::getConnection();
 
-        $priceTable = (new Price())->getCoreTableName();
+        $em = Registry::getEntityManager();
+
+        $priceTable = $em->getClassMetadata( Price::class)->getTableName();
 
         $subsub1Qb = $connection->createQueryBuilder();
         $subsub1Qb->select('price')

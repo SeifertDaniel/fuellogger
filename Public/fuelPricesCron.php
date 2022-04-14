@@ -3,11 +3,11 @@
 namespace Daniels\FuelLogger\PublicDir;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\Station;
 use Daniels\FuelLogger\Application\Model\Fuel;
-use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Application\Model\PriceNotifier;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
-use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Application\Model\StationList;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
@@ -15,6 +15,8 @@ use DanielS\Tankerkoenig\ApiClient;
 use DanielS\Tankerkoenig\ApiException;
 use DanielS\Tankerkoenig\PetrolStation;
 use Doctrine\DBAL\Exception as DoctrineException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -66,6 +68,8 @@ class fuelPricesCron extends Base
      * @throws ApiException
      * @throws DoctrineException
      * @throws GuzzleException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function addFromSurroundingSearch(): UpdatesList
     {
@@ -74,6 +78,7 @@ class fuelPricesCron extends Base
         Registry::getLogger()->debug(__METHOD__);
 
         $updates = new UpdatesList();
+        $entityManager = Registry::getEntityManager();
 
         foreach ($this->getStations() as $stationTkId => $stationData) {
             $station = new Station();
@@ -82,31 +87,33 @@ class fuelPricesCron extends Base
 
             if (false == $stationId) {
                 $details = $this->getDetails($stationTkId);
-                $stationId = $station->insert(
-                    $details->id,
-                    $details->name,
-                    $details->brand,
-                    $details->street,
-                    $details->houseNumber,
-                    $details->postCode,
-                    $details->place,
-                    $details->openingTimes,
-                    $details->lat,
-                    $details->lng,
-                    $details->state
-                );
+                $station = new Station();
+
+                $station->setName($details->name)
+                    ->setBrand($details->brand)
+                    ->setStreet($details->street)
+                    ->setHousenumber($details->houseNumber)
+                    ->setPostcode($details->postCode)
+                    ->setPlace($details->place)
+                    ->setOpeningtimes($details->openingTimes)
+                    ->setLat($details->lat)
+                    ->setLon($details->lng)
+                    ->setState($details->state);
+
+                $entityManager->persist($station);
+                $entityManager->flush();
             }
 
-            $price = new Price();
-
             foreach (Fuel::getTypes() as $type) {
-                if ($price->getLastPrice($stationId, $type) != $stationData[$type]) {
+                if ((new Price())->getLastPrice($stationId, $type) != $stationData[$type]) {
+                    $price = new Price();
+                    $price->setStationid($stationId)
+                        ->setType($type)
+                        ->setPrice($stationData[$type])
+                        ->setDatetime();
 
-                    $price->insert(
-                        $stationId,
-                        $type,
-                        $stationData[$type]
-                    );
+                    $entityManager->persist($price);
+                    $entityManager->flush();
 
                     $stationName = $stationData['name'].' ('.$stationData['place'].')';
                     $updates->add($stationId, $stationData['postCode'], $stationData['brand'], $type, $stationData[$type], $stationName);
@@ -124,6 +131,8 @@ class fuelPricesCron extends Base
      * @throws ApiException
      * @throws DoctrineException
      * @throws GuzzleException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function addFromStationList(): array
     {
@@ -136,11 +145,14 @@ class fuelPricesCron extends Base
             foreach (Fuel::getTypes() as $type) {
                 $price = new Price();
                 if ($priceInfo[$type] && $price->getLastPrice($priceInfo['stationId'], $type) != $priceInfo[$type]) {
-                    $price->insert(
-                        $priceInfo['stationId'],
-                        $type,
-                        $priceInfo[$type]
-                    );
+                    $price->setStationid($priceInfo['stationId'])
+                        ->setType($type)
+                        ->setPrice($priceInfo[$type])
+                        ->setDatetime();
+
+                    $entityManager = Registry::getEntityManager();
+                    $entityManager->persist($price);
+                    $entityManager->flush();
 
                     $updatePrices[$type][] = $priceInfo[$type];
                 }
@@ -157,9 +169,12 @@ class fuelPricesCron extends Base
      */
     public function getStationIds(): array
     {
+        $em = Registry::getEntityManager();
+        $stationTable = $em->getClassMetadata( Station::class)->getTableName();
+
         $qb = DBConnection::getConnection()->createQueryBuilder();
         $qb->select('st.id', 'st.tkid')
-            ->from((new Station())->getCoreTableName(), 'st')
+            ->from($stationTable, 'st')
             ->where('1')
             ->setMaxResults(8);
 

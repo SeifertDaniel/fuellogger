@@ -3,17 +3,18 @@
 namespace Daniels\FuelLogger\Application\Controller;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
+use Daniels\FuelLogger\Application\Model\Entities\openingTimes;
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\Station;
 use Daniels\FuelLogger\Application\Model\ezcGraph\ezcFlexibleColor2DRenderer;
 use Daniels\FuelLogger\Application\Model\ezcGraph\ezcGraphArrayDataSetOpneningTimesColors;
 use Daniels\FuelLogger\Application\Model\ezcGraph\svgFixer;
 use Daniels\FuelLogger\Application\Model\Fuel;
-use Daniels\FuelLogger\Application\Model\openingTimes;
-use Daniels\FuelLogger\Application\Model\Price;
 use Daniels\FuelLogger\Application\Model\PriceStatistics;
-use Daniels\FuelLogger\Application\Model\Station;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
+use Doctrine\ORM\ORMException;
 use ezcBasePropertyNotFoundException;
 use ezcBaseValueException;
 use ezcGraph;
@@ -62,7 +63,8 @@ class stationPriceList implements controllerInterface
     {
         startProfile(__METHOD__);
 
-        $ot = new openingTimes($stationId);
+        $ot = new openingTimes();
+        $ot->load($stationId);
         $list = $ot->getOpeningTimesList();
 
         stopProfile(__METHOD__);
@@ -84,7 +86,8 @@ class stationPriceList implements controllerInterface
         $conn      = DBConnection::getConnection();
 
         $source       = $this->getPriceSourceForChart( $conn, $stationId );
-        $openingTimes = new openingTimes( $stationId );
+        $openingTimes = new openingTimes();
+        $openingTimes->load($stationId);
 
         $graph           = new ezcGraphLineChart();
         $graph->renderer = new ezcFlexibleColor2DRenderer();
@@ -136,10 +139,11 @@ class stationPriceList implements controllerInterface
 
     /**
      * @param Connection|null $conn
-     * @param string                          $stationId
+     * @param string          $stationId
      *
      * @return array
      * @throws DoctrineException
+     * @throws ORMException
      */
     protected function getPriceSourceForChart( ?Connection $conn, string $stationId ): array
     {
@@ -150,8 +154,9 @@ class stationPriceList implements controllerInterface
         $duration         = 1; // week
         $intervalsPerWeek = 60 / $interval * 24 * ( 7 * $duration );
 
-        $prices     = new Price();
-        $priceTable = $prices->getCoreTableName();
+        $em = Registry::getEntityManager();
+
+        $priceTable = $em->getClassMetadata( Price::class)->getTableName();
 
         $source = [];
         foreach ( Fuel::getTypes() as $type ) {
@@ -188,8 +193,10 @@ class stationPriceList implements controllerInterface
     /**
      * @param string $stationId
      * @param Connection $conn
+     *
      * @return array
      * @throws DoctrineException
+     * @throws ORMException
      */
     protected function getPriceStatsLists(string $stationId, Connection $conn): array
     {
@@ -200,11 +207,12 @@ class stationPriceList implements controllerInterface
             $lists[$type]['stat'] = $qb->fetchAllAssociative();
         }
 
+        $em = Registry::getEntityManager();
+
         foreach (Fuel::getTypes() as $type) {
             $qb = $conn->createQueryBuilder();
 
-            $prices = new Price();
-            $priceTable = $prices->getCoreTableName();
+            $priceTable = $em->getClassMetadata( Price::class)->getTableName();
 
             $qb->select("DATE_FORMAT(t1.datetime, '%d.%m. %H:%i') ts1", "DATE_FORMAT(IF(min(t2.datetime) IS NULL, NOW(), min(t2.datetime)), '%d.%m %H:%i') ts2", "t1.price")
                 ->from($priceTable, 't1')
@@ -263,11 +271,12 @@ class stationPriceList implements controllerInterface
      * @param string $stationId
      * @return array
      * @throws DoctrineException
+     * @throws ORMException
      */
     protected function getStation(Connection $conn, string $stationId): array
     {
-        $station = new Station();
-        $stationTable = $station->getCoreTableName();
+        $em = Registry::getEntityManager();
+        $stationTable = $em->getClassMetadata( Station::class)->getTableName();
 
         $qbs = $conn->createQueryBuilder();
         $qbs->select('*', 'CONCAT(name, " (", place, ")") as stationname')
@@ -281,15 +290,18 @@ class stationPriceList implements controllerInterface
     }
 
     /**
-     * @param string $stationId
+     * @param string     $stationId
      * @param Connection $conn
+     *
      * @return array
      * @throws DoctrineException
+     * @throws ORMException
      */
     public function getCurrentPrices(string $stationId, Connection $conn): array
     {
-        $price = new Price();
-        $priceTable = $price->getCoreTableName();
+        $em = Registry::getEntityManager();
+
+        $priceTable = $em->getClassMetadata( Price::class)->getTableName();
 
         $qbs = $conn->createQueryBuilder();
         $qbs->select('pr.type', 'MAX(pr.datetime) as datetime')
