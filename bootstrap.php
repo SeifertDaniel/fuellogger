@@ -13,6 +13,7 @@ require_once VENDOR_PATH.'autoload.php';
 $dotenv = Dotenv::createImmutable(__DIR__."/..");
 $dotenv->load();
 $dotenv->required([
+    'STAGE',
     'DBHOST',
     'DBNAME',
     'DBUSER',
