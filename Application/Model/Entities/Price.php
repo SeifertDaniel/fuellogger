@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\CustomIdGenerator;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\ORMException;
@@ -24,7 +25,6 @@ class Price
     #[Column(type: 'uuid', unique: true), GeneratedValue(strategy: 'CUSTOM'), CustomIdGenerator(class: UuidGenerator::class)]
     private string $id;
 
-    #[ManyToOne(targetEntity: Station::class)]
     #[Column(type: 'uuid')]
     private string $stationid;
 
@@ -37,7 +37,8 @@ class Price
     #[Column]
     private DateTime $datetime;
 
-    #[ManyToOne(inversedBy: 'prices')]
+    #[ManyToOne(targetEntity: Station::class, inversedBy: 'prices')]
+    #[JoinColumn(name: 'stationid', referencedColumnName: 'id')]
     private Station $station;
 
     public function getId(): string
