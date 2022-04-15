@@ -6,6 +6,7 @@ use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationEx
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
+use Daniels\FuelLogger\Core\Stage;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
@@ -52,6 +53,7 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
 
             /** @var UpdatesItem $item */
             foreach ($this->getUpdateList()->getList() as $item) {
+                $message .= ($_ENV['STAGE'] === Stage::DEVELOPMENT ? '(d)' : '');
                 $message .= 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . utf8_decode($item->getStationName()) . PHP_EOL;
             }
 
