@@ -88,6 +88,17 @@ body.disclaimer .container {
 }
 
 .nav-pills .nav-link.active,
-.nav-pills .show > .nav-link {
+.nav-pills .show > .nav-link,
+.dropdown-menu-dark .dropdown-item:active,
+#postCodeButton {
     background-color: goldenrod;
+}
+
+#postCodeButton {
+    border-color: darkgoldenrod;
+}
+
+#postCodeInputLabel {
+    position: absolute;
+    left: -5000px
 }

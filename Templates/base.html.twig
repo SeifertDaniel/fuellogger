@@ -23,12 +23,21 @@
         <link rel="manifest" href="manifest.json?v=220411034405" />
 
         <meta name="robots" content="noindex, nofollow" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="assets/css/bootstrap/bootstrap.css"/>
-        <link rel="stylesheet" href="assets/css/styles.css"/>
-        <script defer src="assets/js/fontawesome/all.js"></script>
+
+        {% block script %}
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="assets/js/bootstrap/bootstrap.min.js"></script>
+            <script defer src="assets/js/fontawesome/all.js"></script>
+        {% endblock %}
+
+        {% block styles %}
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="assets/css/bootstrap/bootstrap.css"/>
+            <link rel="stylesheet" href="assets/css/styles.css"/>
+        {% endblock %}
+
         <title>{% block title %}{% endblock %} - Benzinpreismonitor</title>
     {% endblock %}
 </head>
@@ -44,9 +53,12 @@
         {% include 'footer.html.twig' %}
     {% endblock %}
 </footer>
-{% block script %}
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="assets/js/bootstrap/bootstrap.js"></script>
+{% block footerscript %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".dropdown-toggle").dropdown();
+        });
+    </script>
 {% endblock %}
 </body>
 </html>

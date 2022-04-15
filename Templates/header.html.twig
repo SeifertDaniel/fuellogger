@@ -9,10 +9,26 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.php">Preis&uuml;bersicht</a>
+                <li class="nav-item active dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Preis&uuml;bersicht</a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="index.php">alle</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="index.php?postcode=09366">Stollberg</a></li>
+                        <li><a class="dropdown-item" href="index.php?postcode=09380">Thalheim</a></li>
+                        <li>
+                            <form method="get" action="index.php">
+                                <span class="dropdown-item">
+                                    <label for="postCodeInput" id="postCodeInputLabel" class="form-label">PLZ:</label>
+                                    <input name="postcode" type="text" class="form-control-sm col-8" id="postCodeInput" placeholder="PLZ">
+                                    <button type="submit" id="postCodeButton" class="btn btn-primary btn-sm col-4">OK</button>
+                                </span>
+                            </form>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?cl=priceTrend">Preisentwicklung</a>
@@ -21,7 +37,7 @@
 
             <div class="d-flex align-items-center">
                 <a class="btn btn-dark px-3" href="https://github.com/SeifertDaniel/fuelLoggerProject" role="button" >
-                    <i class="fab fa-github"></i> Github
+                    <i class="fab fa-github"></i>
                 </a>
             </div>
         </div>
