@@ -37,6 +37,9 @@ class Price
     #[Column]
     private DateTime $datetime;
 
+    #[ManyToOne(inversedBy: 'prices')]
+    private Station $station;
+
     public function getId(): string
     {
         return $this->id;
@@ -86,6 +89,25 @@ class Price
     public function setDatetime(): Price
     {
         $this->datetime = new DateTime("now");
+
+        return $this;
+    }
+
+    /**
+     * @return Station
+     */
+    public function getStation(): Station
+    {
+        return $this->station;
+    }
+
+    /**
+     * @param Station $station
+     * @return $this
+     */
+    public function setStation(Station $station): Price
+    {
+        $this->station = $station;
 
         return $this;
     }

@@ -5,12 +5,16 @@ namespace Daniels\FuelLogger\Application\Model\Entities;
 use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\CustomIdGenerator;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\ORMException;
 use Ramsey\Uuid\Doctrine\UuidGenerator;
 
 #[Entity]
@@ -54,12 +58,16 @@ class Station
     #[Column(length: 10)]
     private string $state;
 
-//    #[OneToMany(targetEntity: prices::class, mappedBy: 'station')]
-//    private ArrayCollection $prices;
+    #[OneToMany(mappedBy: 'station', targetEntity: Price::class, cascade: ['persist', 'remove'])]
+    private Collection $prices;
+
+    #[OneToMany(mappedBy: 'station', targetEntity: openingTimes::class, cascade: ['persist', 'remove'])]
+    private Collection $openingTimesCollection;
 
     public function __construct()
     {
         $this->prices = new ArrayCollection();
+        $this->openingTimesCollection = new ArrayCollection();
     }
 
     public function getId(): string
@@ -224,9 +232,55 @@ class Station
         return $this;
     }
 
+    /**
+     * @return ArrayCollection|Collection
+     */
+    public function getPrices(): ArrayCollection|Collection
+    {
+        return $this->prices;
+    }
+
+    /**
+     * @param Price $price
+     * @return Station
+     */
+    public function addPrice(Price $price): Station
+    {
+        $price->setStation($this);
+        $this->prices->add($price);
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|Collection
+     */
+    public function getOpeningTimesCollection(): ArrayCollection|Collection
+    {
+        return $this->openingTimesCollection;
+    }
+
+    /**
+     * @param openingTimes $openingTimes
+     * @return Station
+     */
+    public function addOpeningTimeToCollection(openingTimes $openingTimes): Station
+    {
+        $openingTimes->setStation($this);
+        $this->openingTimesCollection->add($openingTimes);
+
+        return $this;
+    }
+
     public function exists()
     {}
 
+    /**
+     * @param $stationId
+     * @return false|mixed
+     * @throws DoctrineException
+     * @throws ORMException
+     */
     public function getIdByTkId($stationId)
     {
         $conn = DBConnection::getConnection();
@@ -245,7 +299,7 @@ class Station
            )
            ->setMaxResults(1);
 
-        return $conn->fetchOne($qb->getSQL(), $qb->getParameters());
+        return $qb->fetchOne();
     }
 
     public function existsByStationId($stationId)
@@ -265,6 +319,6 @@ class Station
                )
            );
 
-        return (bool) $conn->fetchOne($qb->getSQL(), $qb->getParameters());
+        return (bool) $qb->fetchOne();
     }
 }

@@ -102,6 +102,8 @@ class fuelPricesCron extends Base
 
                 $entityManager->persist($station);
                 $entityManager->flush();
+            } else {
+                $station = $entityManager->find(Station::class, $stationId);
             }
 
             foreach (Fuel::getTypes() as $type) {
@@ -110,7 +112,8 @@ class fuelPricesCron extends Base
                     $price->setStationid($stationId)
                         ->setType($type)
                         ->setPrice($stationData[$type])
-                        ->setDatetime();
+                        ->setDatetime()
+                        ->setStation($station);
 
                     $entityManager->persist($price);
                     $entityManager->flush();

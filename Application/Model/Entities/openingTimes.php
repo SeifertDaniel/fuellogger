@@ -47,6 +47,9 @@ class openingTimes
     #[Column(type: 'time')]
     private string $to;
 
+    #[ManyToOne(inversedBy: 'prices')]
+    private Station $station;
+
     protected string $loadedStationId;
 
     protected array $openingTimes = [];
@@ -130,6 +133,24 @@ class openingTimes
         $this->to = $to;
         return $this;
     }
+    /**
+     * @return Station
+     */
+    public function getStation(): Station
+    {
+        return $this->station;
+    }
+
+    /**
+     * @param Station $station
+     * @return openingTimes
+     */
+    public function setStation(Station $station): openingTimes
+    {
+        $this->station = $station;
+        return $this;
+    }
+
 
     public function load($stationId)
     {
