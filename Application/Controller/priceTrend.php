@@ -11,6 +11,7 @@ use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\ORMException;
+use Exception;
 use ezcGraph;
 use ezcGraphArrayDataSet;
 use ezcGraphAxisRotatedLabelRenderer;
@@ -81,6 +82,12 @@ class priceTrend implements controllerInterface
             $data                     = new ezcGraphArrayDataSet( $data );
             $graph->data[ $fuelType ] = $data;
         }
+
+        $events = [
+            'Ukraine'   => '2022-02-24',
+            'Ostern'    => '2022-04-14'
+        ];
+        $this->addEvents($graph, $events);
 
         // additional axis
         $graph->additionalAxis['oilprice']        = $nAxis = new ezcGraphChartElementNumericAxis();
@@ -197,5 +204,27 @@ class priceTrend implements controllerInterface
         stopProfile(__METHOD__);
 
         return $svg;
+    }
+
+    /**
+     * @param ezcGraphLineChart $graph
+     * @param array $events
+     * @return void
+     * @throws Exception
+     */
+    public function addEvents(ezcGraphLineChart $graph, array $events): void
+    {
+        $date = new \DateTime('2022-02-01');
+        $diffAll = $date->diff(new \DateTime())->format('%a');
+
+        foreach ($events as $eventName => $eventDate) {
+            $diffEvent = $date->diff(new \DateTime($eventDate))->format('%a');
+            $pos = 1 / $diffAll * $diffEvent;
+
+            $graph->additionalAxis[$eventName] = $marker = new ezcGraphChartElementNumericAxis();
+            $marker->position = ezcGraph::BOTTOM;
+            $marker->chartPosition = $pos;
+            $marker->label = $eventName;
+        }
     }
 }
