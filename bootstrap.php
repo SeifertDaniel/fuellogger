@@ -1,6 +1,8 @@
 <?php
 
 use Daniels\FuelLogger\Core\Debug;
+use Daniels\FuelLogger\Core\Stage;
+use Doctrine\DBAL\Types\Type;
 use Dotenv\Dotenv;
 
 define('INSTALLATION_ROOT_PATH', dirname(__DIR__));
@@ -12,6 +14,8 @@ require_once VENDOR_PATH.'autoload.php';
 
 $dotenv = Dotenv::createImmutable(__DIR__."/..");
 $dotenv->load();
+$dotenv->required('STAGE')
+    ->allowedValues(Stage::getList());
 $dotenv->required([
     'STAGE',
     'DBHOST',
@@ -35,6 +39,6 @@ if (Debug::displayErrors()) {
     error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 }
 
-\Doctrine\DBAL\Types\Type::addType('uuid', 'Ramsey\Uuid\Doctrine\UuidType');
+Type::addType('uuid', 'Ramsey\Uuid\Doctrine\UuidType');
 
 require_once BASE_PATH . 'functions.php';
