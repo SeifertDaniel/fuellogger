@@ -14,7 +14,8 @@
         "zetacomponents/graph": "^1.6@alpha",
         "twig/twig":"^3.3",
         "symfony/finder":"^6.0",
-        "symfony/cache":"^6.0"
+        "symfony/cache":"^6.0",
+        "azuyalabs/yasumi":"^2.5"
     },
     "license": "MIT",
     "autoload": {

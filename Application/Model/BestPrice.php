@@ -6,8 +6,11 @@ use Daniels\FuelLogger\Application\Model\Entities\openingTimes;
 use Daniels\FuelLogger\Application\Model\Entities\Price;
 use Daniels\FuelLogger\Application\Model\Entities\Station;
 use Daniels\FuelLogger\Core\Registry;
+use DateTime;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Yasumi\Provider\Germany\Saxony;
+use Yasumi\Yasumi;
 
 class BestPrice
 {
@@ -42,11 +45,15 @@ class BestPrice
                 )
             );
 
+        $holidays = Yasumi::create(Saxony::class, (new DateTime())->format('Y'));
+        $isHoliday = $holidays->isHoliday(new DateTime());
+        $dayCheck = $isHoliday ? "7" : "WEEKDAY(NOW())";
+
         $qb = $conn->createQueryBuilder();
         $qb->select('st.id', 'st.name', 'st.place', 'pr.price', 'TIME_FORMAT(TIMEDIFF(NOW(), pr.datetime), \'%H:%i\') as timediff', 'ISNULL(ot.id) as closed')
             ->from($stationTable, 'st')
             ->leftJoin('st', $priceTable, 'pr', 'st.id = pr.stationid')
-            ->leftJoin('st', $openingTimesTable, 'ot', 'st.id = ot.stationid AND WEEKDAY & 1 << WEEKDAY(NOW()) = 1 << WEEKDAY(NOW()) AND TIME(NOW()) BETWEEN `FROM` AND `TO`')
+            ->leftJoin('st', $openingTimesTable, 'ot', 'st.id = ot.stationid AND WEEKDAY & 1 << '.$dayCheck.' = 1 << '.$dayCheck.' AND TIME(NOW()) BETWEEN `FROM` AND `TO`')
             ->where(
                 $qb->expr()->and(
                     $qb->expr()->eq(

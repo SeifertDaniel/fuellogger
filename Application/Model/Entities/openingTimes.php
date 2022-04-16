@@ -29,7 +29,7 @@ class openingTimes
     const WDAY_FRI = 5;  // 16
     const WDAY_SAT = 6;  // 32
     const WDAY_SUN = 7;  // 64
-    const WDAY_FEA = 8;  // 128
+    const WDAY_BANKHOLIDAY = 8;  // 128
 
     #[Id]
     #[Column(type: 'uuid', unique: true), GeneratedValue(strategy: 'CUSTOM'), CustomIdGenerator(class: UuidGenerator::class)]
@@ -171,7 +171,7 @@ class openingTimes
             self::WDAY_FRI  => 'Freitag',
             self::WDAY_SAT  => 'Samstag',
             self::WDAY_SUN  => 'Sonntag',
-            self::WDAY_FEA  => 'Feiertag'
+            self::WDAY_BANKHOLIDAY  => 'Feiertag'
         ];
     }
 
