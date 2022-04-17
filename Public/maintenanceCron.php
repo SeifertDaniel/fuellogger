@@ -12,10 +12,12 @@ use Daniels\FuelLogger\Application\Model\Oilprices\CommoditiesApiException;
 use Daniels\FuelLogger\Core\Base;
 use Daniels\FuelLogger\Core\Registry;
 use DateTime;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
+use Throwable;
 
 require_once dirname(__FILE__) . "/../bootstrap.php";
 
@@ -50,7 +52,7 @@ class maintenanceCron extends Base
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function addCurrentOilPrices()
+    public function addCurrentOilPrices(): void
     {
         startProfile(__METHOD__);
 
@@ -64,7 +66,8 @@ class maintenanceCron extends Base
 
             $rates = $this->api->request([CommoditiesApi::SYMBOL_BRENTOIL]);
 
-            $oilPrice->setPrice(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL});
+            $oilPrice->setPrice(1 / $rates->{CommoditiesApi::SYMBOL_BRENTOIL})
+                ->setDate();
 
             $em = Registry::getEntityManager();
             $em->persist($oilPrice);
@@ -85,30 +88,30 @@ class maintenanceCron extends Base
         startProfile(__METHOD__);
 
         try {
-            $em = Registry::getEntityManager();
-
-            $priceTable = $em->getClassMetadata( Price::class)->getTableName();
-            $priceArchiveTable = $em->getClassMetadata( PriceArchive::class)->getTableName();
-
             $conn = DBConnection::getConnection();
+            $conn->transactional(
+                function(Connection $conn) {
+                    $em = Registry::getEntityManager();
 
-            $queries = [
-                'START TRANSACTION;',
-                "INSERT INTO " . $conn->quoteIdentifier($priceArchiveTable) . " (id, date, type, min, avg, max)
-                    SELECT UUID(), DATE_FORMAT(datetime, '%Y-%m-%d') as date, type, MIN(price) as min, AVG(price) as avg, MAX(price) as max 
-                    FROM " . $conn->quoteIdentifier($priceTable) . "
-                    WHERE DATE_FORMAT(datetime, '%Y-%m-%d') < DATE_SUB(NOW(), INTERVAL ".self::DATES_TO_ARCHIVE." DAY)
-                    GROUP BY date, type;
-                ",
-                "DELETE FROM " . $conn->quoteIdentifier($priceTable) . "
-                    WHERE DATE_FORMAT(datetime, '%Y-%m-%d') < DATE_SUB(NOW(), INTERVAL ".self::DATES_TO_ARCHIVE." DAY);
-                ",
-                "OPTIMIZE TABLE ".$conn->quoteIdentifier($priceTable).";",
-                "COMMIT;"
-            ];
+                    $priceTable = $em->getClassMetadata( Price::class)->getTableName();
+                    $priceArchiveTable = $em->getClassMetadata( PriceArchive::class)->getTableName();
 
-            $conn->executeQuery(implode(' ', $queries));
-        } catch (DoctrineException $e) {
+                    $conn->executeQuery("INSERT INTO " . $conn->quoteIdentifier($priceArchiveTable) . " (id, date, type, min, avg, max)
+                        SELECT UUID(), DATE_FORMAT(datetime, '%Y-%m-%d') as date, type, MIN(price) as min, AVG(price) as avg, MAX(price) as max
+                        FROM " . $conn->quoteIdentifier($priceTable) . "
+                        WHERE DATE_FORMAT(datetime, '%Y-%m-%d') < DATE_SUB(NOW(), INTERVAL ".maintenanceCron::DATES_TO_ARCHIVE." DAY)
+                        GROUP BY date, type;
+                    ");
+                    $conn->executeQuery("DELETE FROM " . $conn->quoteIdentifier($priceTable) . "
+                        WHERE DATE_FORMAT(datetime, '%Y-%m-%d') < DATE_SUB(NOW(), INTERVAL ".maintenanceCron::DATES_TO_ARCHIVE." DAY);
+                    ");
+                }
+            );
+
+            $em = Registry::getEntityManager();
+            $priceTable = $em->getClassMetadata( Price::class)->getTableName();
+            $conn->executeQuery("OPTIMIZE TABLE ".$conn->quoteIdentifier($priceTable).";");
+        } catch (Throwable|DoctrineException $e) {
             Registry::getLogger()->error($e->getMessage());
             Registry::getLogger()->error($e->getTraceAsString());
         }

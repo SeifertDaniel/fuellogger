@@ -4,6 +4,7 @@ namespace Daniels\FuelLogger\Application\Model\Entities;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Core\Registry;
+use DateTime;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\CustomIdGenerator;
@@ -24,6 +25,26 @@ class OilPrice
 
     #[Column(type: 'decimal', precision: 7, scale: 4)]
     private float $price;
+
+    #[Column(type: 'date')]
+    private DateTime $date;
+
+    /**
+     * @return DateTime
+     */
+    public function getDate(): DateTime
+    {
+        return $this->date;
+    }
+
+    /**
+     * @return OilPrice
+     */
+    public function setDate(): OilPrice
+    {
+        $this->date = new DateTime();
+        return $this;
+    }
 
     /**
      * @return string
