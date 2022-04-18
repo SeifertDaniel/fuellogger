@@ -6,6 +6,9 @@ use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\Entities\OilPrice;
 use Daniels\FuelLogger\Application\Model\Entities\Price;
 use Daniels\FuelLogger\Application\Model\Entities\PriceArchive;
+use Daniels\FuelLogger\Application\Model\ezcGraph\ezcFlexibleColor2DRenderer;
+use Daniels\FuelLogger\Application\Model\ezcGraph\ezcGraphAxisRotatedOffsetLabelRenderer;
+use Daniels\FuelLogger\Application\Model\ezcGraph\ezcGraphChartElementOffsetAxis;
 use Daniels\FuelLogger\Application\Model\ezcGraph\svgFixer;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Connection as Connection;
@@ -14,7 +17,6 @@ use Doctrine\ORM\ORMException;
 use Exception;
 use ezcGraph;
 use ezcGraphArrayDataSet;
-use ezcGraphAxisRotatedLabelRenderer;
 use ezcGraphChartElementNumericAxis;
 use ezcGraphColor;
 use ezcGraphLineChart;
@@ -52,6 +54,7 @@ class priceTrend implements controllerInterface
         $allStats = array_merge( $fuelStats, $oilStats );
 
         $graph = new ezcGraphLineChart();
+        $graph->renderer = new ezcFlexibleColor2DRenderer();
 
         // colors
         //$graph->background->background = new ezcGraphColor(['red'   => 255, 'green' => 255, 'blue'  => 255]);
@@ -64,8 +67,9 @@ class priceTrend implements controllerInterface
 
         // axis
         $graph->yAxis->label                    = 'Benzinpreis';
-        $graph->xAxis->axisLabelRenderer        = new ezcGraphAxisRotatedLabelRenderer();
+        $graph->xAxis->axisLabelRenderer        = new ezcGraphAxisRotatedOffsetLabelRenderer();
         $graph->xAxis->axisLabelRenderer->angle = 0;
+        $graph->xAxis->axisLabelRenderer->yoffset = 12;
         $graph->xAxis->axisSpace                = .25;
 
         // legend
@@ -93,7 +97,7 @@ class priceTrend implements controllerInterface
         $graph->additionalAxis['oilprice']        = $nAxis = new ezcGraphChartElementNumericAxis();
         $nAxis->position                          = ezcGraph::BOTTOM;
         $nAxis->chartPosition                     = 1;
-        $nAxis->label                             = 'Oelpreis';
+        $nAxis->label                             = 'Rohölpreis';
         $graph->data[ ucfirst( 'brent' ) ]->yAxis = $nAxis;
         $graph->renderToOutput( 1200, 600 );
 
@@ -214,6 +218,7 @@ class priceTrend implements controllerInterface
      */
     public function addEvents(ezcGraphLineChart $graph, array $events): void
     {
+        // ToDo: get lowest date from database
         $date = new \DateTime('2022-02-01');
         $diffAll = $date->diff(new \DateTime())->format('%a');
 
@@ -221,10 +226,13 @@ class priceTrend implements controllerInterface
             $diffEvent = $date->diff(new \DateTime($eventDate))->format('%a');
             $pos = 1 / $diffAll * $diffEvent;
 
-            $graph->additionalAxis[$eventName] = $marker = new ezcGraphChartElementNumericAxis();
+            $graph->additionalAxis[$eventName] = $marker = new ezcGraphChartElementOffsetAxis();
             $marker->position = ezcGraph::BOTTOM;
             $marker->chartPosition = $pos;
             $marker->label = $eventName;
+            $marker->labelRotation = -90;
+            $marker->xoffset = 0;
+            $marker->yoffset = 60;
         }
     }
 }
