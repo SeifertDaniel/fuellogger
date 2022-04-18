@@ -57,20 +57,22 @@ abstract class CallMeBot extends AbstractNotifier implements NotifierInterface
                 $message .= 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . utf8_decode($item->getStationName()) . PHP_EOL;
             }
 
-            $url = 'https://api.callmebot.com/'.$this->endpoint.'?'.$this->getQuery($message);
-            $client = new Client();
-            $response = $client->get($url, [
-                'connect_timeout' => 15,
-                'read_timeout' => 45,
-                'timeout' => 60
-            ]);
+            if (strlen($message) > 0) {
+                $url = 'https://api.callmebot.com/' . $this->endpoint . '?' . $this->getQuery($message);
+                $client = new Client();
+                $response = $client->get($url, [
+                    'connect_timeout' => 15,
+                    'read_timeout' => 45,
+                    'timeout' => 60
+                ]);
 
-            $errorMsg = strip_tags(stristr($response->getBody()->getContents(), 'Error: '));
+                $errorMsg = strip_tags(stristr($response->getBody()->getContents(), 'Error: '));
 
-            if ($response->getStatusCode() != 200) {
-                throw new TransferException(get_class($this).' request returns '.$response->getStatusCode().' - '.$url);
-            } elseif ($errorMsg) {
-                throw new TransferException(get_class($this).' request returns '.$errorMsg.' - '.$url);
+                if ($response->getStatusCode() != 200) {
+                    throw new TransferException(get_class($this) . ' request returns ' . $response->getStatusCode() . ' - ' . $url);
+                } elseif ($errorMsg) {
+                    throw new TransferException(get_class($this) . ' request returns ' . $errorMsg . ' - ' . $url);
+                }
             }
 
             Registry::getLogger()->debug(__METHOD__.' - finished - '.$message);
