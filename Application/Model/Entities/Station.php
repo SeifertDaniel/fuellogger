@@ -277,11 +277,11 @@ class Station
 
     /**
      * @param $stationId
-     * @return false|mixed
+     * @return string
      * @throws DoctrineException
      * @throws ORMException
      */
-    public function getIdByTkId($stationId)
+    public function getIdByTkId($stationId) : string
     {
         $conn = DBConnection::getConnection();
         $qb = $conn->createQueryBuilder();
@@ -302,7 +302,13 @@ class Station
         return $qb->fetchOne();
     }
 
-    public function existsByStationId($stationId)
+    /**
+     * @param $stationId
+     * @return bool
+     * @throws DoctrineException
+     * @throws ORMException
+     */
+    public function existsByStationId($stationId): bool
     {
         $conn = DBConnection::getConnection();
         $qb = $conn->createQueryBuilder();

@@ -109,7 +109,8 @@ class fuelPricesCron extends Base
             foreach (Fuel::getTypes() as $type) {
                 if ((new Price())->getLastPrice($stationId, $type) != $stationData[$type]) {
                     $price = new Price();
-                    $price->setStationid($stationId)
+                    $price
+                        ->setStationid($stationId)
                         ->setType($type)
                         ->setPrice($stationData[$type])
                         ->setDatetime()
