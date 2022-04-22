@@ -4,54 +4,87 @@ declare(strict_types=1);
 
 namespace Daniels\FuelLogger\Migrations\Data;
 
+use Daniels\FuelLogger\Application\Model\Entities\Price;
+use Daniels\FuelLogger\Application\Model\Entities\Station;
+use Daniels\FuelLogger\Core\Registry;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaException;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Migrations\AbstractMigration;
+use Doctrine\ORM\ORMException;
+use Psr\Log\LoggerInterface;
 
 final class Version20220314093924 extends AbstractMigration
 {
+    private string $stationsTableName;
+    private string $pricesTableName;
+
+    /**
+     * @param Connection      $connection
+     * @param LoggerInterface $logger
+     *
+     * @throws ORMException
+     */
+    public function __construct( Connection $connection, LoggerInterface $logger )
+    {
+        parent::__construct( $connection, $logger );
+
+        $em                      = Registry::getEntityManager();
+        $this->stationsTableName = $em->getClassMetadata( Station::class)->getTableName();
+        $this->pricesTableName = $em->getClassMetadata( Price::class)->getTableName();
+    }
+
+    /**
+     * @return string
+     */
     public function getDescription(): string
     {
         return 'create price and stations table';
     }
 
+    /**
+     * @param Schema $schema
+     *
+     * @throws SchemaException
+     */
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE `prices` (
-              `id` char(36) NOT NULL,
-              `stationid` char(36) NOT NULL,
-              `type` char(10) NOT NULL,
-              `price` decimal(4,3) NOT NULL,
-              `datetime` datetime NOT NULL,
-              `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;');
+        $pricesTable = $schema->createTable($this->pricesTableName)->addOption('engine', 'InnoDb')->addOption( "charset", "utf8mb4" );
+        $pricesTable->addColumn('id', Types::STRING)->setLength(36)->setNotnull(true);
+        $pricesTable->addColumn('stationid', Types::STRING)->setLength(36)->setNotnull(true);
+        $pricesTable->addColumn('type', Types::STRING)->setLength(10)->setNotnull(true);
+        $pricesTable->addColumn('price', Types::DECIMAL)->setPrecision(4)->setScale(3)->setNotnull(true);
+        $pricesTable->addColumn('datetime', Types::DATETIME_MUTABLE)->setNotnull(true);
+        $pricesTable->addColumn('timestamp', Types::DATETIME_IMMUTABLE, ['columnDefinition' => 'timestamp default current_timestamp on update current_timestamp']);
+        $pricesTable->setPrimaryKey(['id']);
 
-        $this->addSql('
-            ALTER TABLE `prices`
-                ADD PRIMARY KEY (`id`);
-        ');
+        $stationsTable = $schema->createTable($this->stationsTableName)->addOption('engine', 'InnoDb')->addOption( "charset", "utf8mb4" );
+        $stationsTable->addColumn('ID', Types::STRING)->setLength(36)->setNotnull(true);
+        $stationsTable->addColumn('TKID', Types::STRING)->setLength(36)->setNotnull(true);
+        $stationsTable->addColumn('NAME', Types::STRING)->setLength(100)->setNotnull(true);
+        $stationsTable->addColumn('BRAND', Types::STRING)->setLength(100)->setNotnull(true);
+        $stationsTable->addColumn('STREET', Types::STRING)->setLength(100)->setNotnull(true);
+        $stationsTable->addColumn('HOUSENUMBER', Types::STRING)->setLength(10)->setNotnull(true);
+        $stationsTable->addColumn('POSTCODE', Types::STRING)->setLength(10)->setNotnull(true);
+        $stationsTable->addColumn('PLACE', Types::STRING)->setLength(50)->setNotnull(true);
+        $stationsTable->addColumn('OPENINGTIMES', Types::TEXT)->setNotnull(true);
+        $stationsTable->addColumn('LAT', Types::DECIMAL)->setPrecision(8)->setScale(6)->setNotnull(true);
+        $stationsTable->addColumn('LON', Types::DECIMAL)->setPrecision(8)->setScale(6)->setNotnull(true);
+        $stationsTable->addColumn('STATE', Types::STRING)->setLength(10)->setNotnull(true);
+        $stationsTable->addColumn('TIMESTAMP', Types::DATETIME_IMMUTABLE, ['columnDefinition' => 'timestamp default current_timestamp on update current_timestamp']);
+        $stationsTable->setPrimaryKey(['ID']);
+        $stationsTable->addUniqueIndex(['TKID'], 'TKID');
+    }
 
-        $this->addSql('
-            CREATE TABLE `stations` (
-              `ID` varchar(36) NOT NULL,
-              `TKID` char(36) NOT NULL,
-              `NAME` varchar(100) NOT NULL,
-              `BRAND` varchar(100) NOT NULL,
-              `STREET` varchar(100) CHARACTER SET utf8 NOT NULL,
-              `HOUSENUMBER` varchar(10) NOT NULL,
-              `POSTCODE` varchar(10) NOT NULL,
-              `PLACE` varchar(50) NOT NULL,
-              `OPENINGTIMES` text NOT NULL,
-              `LAT` decimal(8,6) NOT NULL,
-              `LON` decimal(8,6) NOT NULL,
-              `STATE` varchar(10) DEFAULT NULL,
-              `TIMESTAMP` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ');
-
-        $this->addSql('
-            ALTER TABLE `stations`
-              ADD PRIMARY KEY (`ID`),
-              ADD UNIQUE KEY `TKID` (`TKID`);
-        ');
+    /**
+     * @param Schema $schema
+     *
+     * @throws SchemaException
+     */
+    public function down( Schema $schema ): void
+    {
+        $schema->dropTable($this->pricesTableName);
+        $schema->dropTable($this->stationsTableName);
     }
 }
