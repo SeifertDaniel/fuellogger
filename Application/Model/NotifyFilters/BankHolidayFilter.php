@@ -1,15 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
-use Daniels\FuelLogger\Application\Model\DBConnection;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\DatabaseQueryFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\HighEfficencyFilter;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use DateTime;
-use Doctrine\DBAL\Exception;
 use Yasumi\Provider\Germany\Saxony;
 use Yasumi\Yasumi;
 
@@ -18,7 +18,7 @@ class BankHolidayFilter extends AbstractFilter implements DatabaseQueryFilter, H
     const ISBANKHOLIDAY = true;
     const ISNOBANKHOLIDAY = false;
 
-    public bool $isBankHoliday;
+    private bool $isBankHoliday;
 
     /**
      * @param bool $isBankHoliday
@@ -28,6 +28,11 @@ class BankHolidayFilter extends AbstractFilter implements DatabaseQueryFilter, H
         $this->isBankHoliday = $isBankHoliday;
     }
 
+    /**
+     * @param UpdatesItem $item
+     *
+     * @return bool
+     */
     public function filterItem(UpdatesItem $item): bool
     {
         startProfile(__METHOD__);
@@ -52,7 +57,6 @@ class BankHolidayFilter extends AbstractFilter implements DatabaseQueryFilter, H
      * @param string $stationTableAlias
      *
      * @return string
-     * @throws Exception
      */
     public function getFilterQuery(string $priceTableAlias, string $stationTableAlias): string
     {
@@ -64,7 +68,7 @@ class BankHolidayFilter extends AbstractFilter implements DatabaseQueryFilter, H
      */
     public function getDoFilter(): bool
     {
-        $holidays = Yasumi::create(Saxony::class, (new DateTime())->format('Y'));
+        $holidays = Yasumi::create(Saxony::class, (int) (new DateTime())->format('Y'));
         $isHoliday = $holidays->isHoliday(new DateTime());
 
         return $this->isBankHoliday ? $isHoliday : !$isHoliday;

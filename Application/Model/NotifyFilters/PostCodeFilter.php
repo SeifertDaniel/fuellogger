@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -13,7 +15,7 @@ use Doctrine\DBAL\Exception;
 
 class PostCodeFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFilter, MediumEfficencyFilter
 {
-    protected array $postCodes = [];
+    private array $postCodes;
 
     /**
      * @param array $postCodes
@@ -47,6 +49,8 @@ class PostCodeFilter extends AbstractFilter implements DatabaseQueryFilter, Item
 
     /**
      * @param string $priceTableAlias
+     * @param string $stationTableAlias
+     *
      * @return string
      * @throws Exception
      */

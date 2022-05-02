@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters\Collections;
 
 use Daniels\FuelLogger\Application\Model\Fuel;

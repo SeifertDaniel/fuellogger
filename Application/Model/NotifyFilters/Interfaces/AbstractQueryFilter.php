@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces;
 
 abstract class AbstractQueryFilter extends AbstractFilter

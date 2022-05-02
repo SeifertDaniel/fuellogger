@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -19,8 +21,10 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
 
     /**
      * @param UpdatesItem $item
+     *
      * @return bool
      * @throws Exception
+     * @throws ORMException
      */
     public function filterItem(UpdatesItem $item): bool
     {
@@ -71,7 +75,7 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
             ->setMaxResults(1);
 
         Registry::getLogger()->debug($qb->getSQL());
-        $queryHash = md5($qb);
+        $queryHash = md5(serialize($qb->getSQL()));
 
         if (!isset($this->bestPriceCache[$queryHash]) || !$this->bestPriceCache[$queryHash]) {
             Registry::getLogger()->debug('not from cache');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -88,7 +90,7 @@ class PriceInLowest extends AbstractQueryFilter implements ItemFilter, LowEffice
             ->setMaxResults(1);
 
         Registry::getLogger()->debug($qb->getSQL());
-        $queryHash = md5($qb);
+        $queryHash = md5(serialize($qb->getSQL()));
 
         if ( !isset( $this->priceCache[ $queryHash]) || ! $this->priceCache[ $queryHash]) {
             Registry::getLogger()->debug('not from cache');

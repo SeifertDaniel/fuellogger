@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -21,8 +23,8 @@ class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFil
     const HIGHERTHANEQUALS = '>=';
     const HIGHERTHAN = '>';
 
-    public string $operator;
-    public float $price;
+    private string $operator;
+    private float $price;
 
     /**
      * @param string $operator
@@ -103,21 +105,26 @@ class PriceFilter extends AbstractFilter implements DatabaseQueryFilter, ItemFil
      */
     public function checkIsValid($operator)
     {
-        if (!in_array(
-            $operator,
-            [
-                self::LOWERTHAN,
-                self::LOWERTHANEQUALS,
-                self::EQUALS,
-                self::NOTEQUALS,
-                self::HIGHERTHANEQUALS,
-                self::HIGHERTHAN
-            ]
-        )) {
+        if (!in_array($operator, $this->getOperatorList())) {
             $this->setDebugMessage('invalid price comparison operator '.$this->operator);
             throw new filterPreventsNotificationException($this);
         }
 
         return $operator;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getOperatorList(): array
+    {
+        return [
+            self::LOWERTHAN,
+            self::LOWERTHANEQUALS,
+            self::EQUALS,
+            self::NOTEQUALS,
+            self::HIGHERTHANEQUALS,
+            self::HIGHERTHAN
+        ];
     }
 }

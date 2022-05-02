@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -13,7 +15,7 @@ use Doctrine\DBAL\Exception as DoctrineException;
 
 class StationIdFilter extends AbstractFilter implements ItemFilter, DatabaseQueryFilter, MediumEfficencyFilter
 {
-    protected array $stationIds = [];
+    private array $stationIds;
 
     /**
      * @param array $stationIds

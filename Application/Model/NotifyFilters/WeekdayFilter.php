@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -21,7 +23,7 @@ class WeekdayFilter extends AbstractFilter implements DatabaseQueryFilter, HighE
     const SATURDAY = 6;
     const SUNDAY = 7;
 
-    protected array $weekdays = [];
+    private array $weekdays;
 
     /**
      * @param array $weekdays
@@ -56,6 +58,8 @@ class WeekdayFilter extends AbstractFilter implements DatabaseQueryFilter, HighE
 
     /**
      * @param string $priceTableAlias
+     * @param string $stationTableAlias
+     *
      * @return string
      * @throws Exception
      */

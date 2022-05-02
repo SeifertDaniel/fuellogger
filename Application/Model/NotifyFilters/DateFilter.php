@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -13,8 +15,8 @@ use Doctrine\DBAL\Exception;
 
 class DateFilter extends AbstractFilter implements DatabaseQueryFilter, HighEfficencyFilter
 {
-    public string $from;
-    public string $till;
+    private string $from;
+    private string $till;
 
     /**
      * @param string $from
@@ -32,7 +34,7 @@ class DateFilter extends AbstractFilter implements DatabaseQueryFilter, HighEffi
 
         $f = DateTime::createFromFormat('!Y-m-d', $this->from);
         $t = DateTime::createFromFormat('!Y-m-d', $this->till);
-        $i = (new DateTime())->setDate($f->format('Y'),$f->format('m'), $f->format('d'));
+        $i = (new DateTime())->setDate((int) $f->format('Y'), (int) $f->format('m'), (int) $f->format('d'));
 
         $doFilter = !($f <= $i && $i <= $t);
 

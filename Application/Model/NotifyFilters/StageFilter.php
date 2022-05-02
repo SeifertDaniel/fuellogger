@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\AbstractFilter;
@@ -9,7 +11,7 @@ use Daniels\FuelLogger\Core\Registry;
 
 class StageFilter extends AbstractFilter implements HighEfficencyFilter
 {
-    protected array $stageTypes = [];
+    private array $stageTypes;
 
     /**
      * @param array $stageTypes

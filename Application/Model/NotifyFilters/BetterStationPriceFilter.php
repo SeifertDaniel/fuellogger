@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Daniels\FuelLogger\Application\Model\NotifyFilters;
 
 use Daniels\FuelLogger\Application\Model\DBConnection;
@@ -11,15 +13,18 @@ use Daniels\FuelLogger\Application\Model\NotifyFilters\Interfaces\LowEfficencyFi
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\ORMException;
 
 class BetterStationPriceFilter extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
 {
-    public array $priceBeforeUpdateCache = [];
+    private array $priceBeforeUpdateCache = [];
 
     /**
      * @param UpdatesItem $item
+     *
      * @return bool
      * @throws Exception
+     * @throws ORMException
      */
     public function filterItem(UpdatesItem $item): bool
     {
@@ -41,8 +46,10 @@ class BetterStationPriceFilter extends AbstractQueryFilter implements ItemFilter
 
     /**
      * @param $stationId
+     *
      * @return float
      * @throws Exception
+     * @throws ORMException
      */
     public function getPriceBeforeUpdate($stationId): float
     {
@@ -67,7 +74,7 @@ class BetterStationPriceFilter extends AbstractQueryFilter implements ItemFilter
             ->orderBy('pr.datetime', 'DESC')
             ->setMaxResults(1);
 
-        $queryHash = md5($qb);
+        $queryHash = md5(serialize($qb->getSQL()));
 
         if (!isset($this->priceBeforeUpdateCache[$queryHash]) || !$this->priceBeforeUpdateCache[$queryHash]) {
             startProfile(__METHOD__.'::notCached');
