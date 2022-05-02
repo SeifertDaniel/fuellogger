@@ -75,7 +75,9 @@ class Registry
      */
     public static function getEntityManager(): EntityManager
     {
-        startProfile(__METHOD__);
+        if (function_exists('startProfile')) {
+            startProfile( __METHOD__ );
+        }
 
         $connectionParams = [
             'dbname' => $_ENV['DBNAME'],
@@ -89,7 +91,9 @@ class Registry
         $config = Setup::createAttributeMetadataConfiguration([__DIR__ . '/../Application/Model/Entities']);
         $em = EntityManager::create($connectionParams, $config);
 
-        stopProfile(__METHOD__);
+        if (function_exists('stopProfile')) {
+            stopProfile( __METHOD__ );
+        }
 
         return $em;
     }
