@@ -6,6 +6,7 @@ use Daniels\FuelLogger\Application\Model\Exceptions\filterPreventsNotificationEx
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesItem;
 use Daniels\FuelLogger\Application\Model\PriceUpdates\UpdatesList;
 use Daniels\FuelLogger\Core\Registry;
+use Daniels\FuelLogger\Core\Stage;
 use Doctrine\DBAL\Exception as DoctrineException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -43,7 +44,8 @@ class WebHook extends AbstractNotifier implements NotifierInterface
             /** @var UpdatesItem $item */
             foreach ($this->getUpdateList()->getList() as $item) {
                 Registry::getLogger()->debug(get_class($this).' notifies');
-                $message = 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . $item->getStationName();
+                $message = ($_ENV['STAGE'] === Stage::DEVELOPMENT ? '(d)' : '');
+                $message .= 'Preis ' . ucfirst($item->getFuelType()) . ': ' . $item->getFuelPrice() . ' ' . $item->getStationName();
                 $message = preg_replace('/' . PHP_EOL . '/', ' ', $message);
 
                 startProfile(__METHOD__.'::request');
