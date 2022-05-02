@@ -13,14 +13,31 @@ use Daniels\FuelLogger\Core\Registry;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\ORMException;
 
-class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
+class PriceInLowest extends AbstractQueryFilter implements ItemFilter, LowEfficencyFilter
 {
-    private array $bestPriceCache = [];
+    const HALF = 0.5;
+    const THIRD = 0.33;
+    const QUARTER = 0.25;
+    const TENPERCENT = 0.1;
+
+    private float $subsection;
+
+    private array $priceCache = [];
+
+    /**
+     * @param float $subsection
+     */
+    public function __construct(float $subsection)
+    {
+        $this->subsection = $subsection;
+    }
 
     /**
      * @param UpdatesItem $item
+     *
      * @return bool
      * @throws Exception
+     * @throws ORMException
      */
     public function filterItem(UpdatesItem $item): bool
     {
@@ -28,15 +45,15 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
 
         Registry::getLogger()->debug(__METHOD__);
 
-        $dailyBestPriceBeforeUpdate = $this->getBestPriceBeforeUpdate();
+        $highestSubsectionPriceBeforeUpdate = $this->getHighestSubsectionPriceBeforeUpdate();
         $lowestUpdatePrice = $this->getNotifier()->getUpdateList()->getLowestPrice();
 
-        $doFilter = $item->getFuelPrice() >= $dailyBestPriceBeforeUpdate ||
+        $doFilter = $item->getFuelPrice() >= $highestSubsectionPriceBeforeUpdate ||
             $item->getFuelPrice() > $lowestUpdatePrice;
 
         if ($doFilter) {
             Registry::getLogger()->debug(get_class($this));
-            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not lower than $dailyBestPriceBeforeUpdate");
+            Registry::getLogger()->debug("price ".$item->getFuelPrice()." is not lower than $highestSubsectionPriceBeforeUpdate");
         }
 
         stopProfile(__METHOD__);
@@ -49,7 +66,7 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
      * @throws Exception
      * @throws ORMException
      */
-    public function getBestPriceBeforeUpdate(): float
+    public function getHighestSubsectionPriceBeforeUpdate(): float
     {
         startProfile(__METHOD__);
 
@@ -58,7 +75,7 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
         $stationTable = $em->getClassMetadata( Station::class)->getTableName();
 
         $qb = DBConnection::getConnection()->createQueryBuilder();
-        $qb->select('pr.price')
+        $qb->select('MIN(pr.price) + ((MAX(pr.price) - MIN(pr.price)) * '.$this->subsection.')')
             ->from($priceTable, 'pr')
             ->leftJoin('pr', $stationTable, 'st', 'pr.stationid = st.id')
             ->where(
@@ -73,14 +90,14 @@ class DailyBestPriceFilter extends AbstractQueryFilter implements ItemFilter, Lo
         Registry::getLogger()->debug($qb->getSQL());
         $queryHash = md5($qb);
 
-        if (!isset($this->bestPriceCache[$queryHash]) || !$this->bestPriceCache[$queryHash]) {
+        if ( !isset( $this->priceCache[ $queryHash]) || ! $this->priceCache[ $queryHash]) {
             Registry::getLogger()->debug('not from cache');
             startProfile(__METHOD__.'::notCached');
-            $this->bestPriceCache[$queryHash] = (float) $qb->fetchOne() ?: 10.0;
+            $this->priceCache[ $queryHash] = (float) $qb->fetchOne() ?: 10.0;
             stopProfile(__METHOD__.'::notCached');
         }
 
-        $return = $this->bestPriceCache[$queryHash];
+        $return = $this->priceCache[ $queryHash];
 
         stopProfile(__METHOD__);
 

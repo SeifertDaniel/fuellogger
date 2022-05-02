@@ -64,7 +64,10 @@ abstract class AbstractFilter
                 if ($filtered) {
                     $priceUpdates->remove($id);
                 }
+Registry::getLogger()->debug(__METHOD__.__LINE__);
+Registry::getLogger()->debug($priceUpdates->count());
                 if (! (bool) $priceUpdates->count()) {
+Registry::getLogger()->debug(__METHOD__.__LINE__);
                     throw new filterPreventsNotificationException($this);
                 }
             }
