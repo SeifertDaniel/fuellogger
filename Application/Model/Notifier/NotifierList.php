@@ -7,6 +7,7 @@ use Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier\Ifttt;
 use Daniels\FuelLogger\Application\Model\Notifier\ConcreteNotifier\WhatsApp;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\BetterStationPriceFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Collections\StlE10ByDayCollection;
+use Daniels\FuelLogger\Application\Model\NotifyFilters\Collections\StlE10GoodPriceCollection;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\Collections\TlhE10AviaWorkDay;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\DailyBestPriceFilter;
 use Daniels\FuelLogger\Application\Model\NotifyFilters\FuelTypeFilter;
@@ -38,7 +39,7 @@ class NotifierList
                 ->addFilter(new StageFilter([Stage::DEVELOPMENT]))
             ,
             'Stollberg prod' => (new Ifttt($_ENV['C001_IFTTT_URL']))
-                ->addFilter(new StlE10ByDayCollection())
+                ->addFilter(new StlE10GoodPriceCollection())
                 ->addFilter(new StageFilter([Stage::PRODUCTION]))
             ,
             'Avia Thalheim prod' => (new Ifttt($_ENV['C001_IFTTT_URL']))
