@@ -89,7 +89,8 @@ class priceTrend implements controllerInterface
 
         $events = [
             'Ukraine'   => '2022-02-24',
-            'Ostern'    => '2022-04-14'
+            //'Ostern'    => '2022-04-14',
+            'Tankrabatt' => '2022-06-01',
         ];
         $this->addEvents($graph, $events);
 
