@@ -88,7 +88,7 @@ class Registry
             'charset' => 'utf8mb4'
         ];
 
-        $config = Setup::createAttributeMetadataConfiguration([__DIR__ . '/../Application/Model/Entities']);
+        $config = Setup::createAttributeMetadataConfiguration([__DIR__ . '/../Application/Model/Entities'], true);
         $em = EntityManager::create($connectionParams, $config);
 
         if (function_exists('stopProfile')) {
